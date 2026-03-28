@@ -1,0 +1,57 @@
+{
+  "name": "oxdoc",
+  "version": "0.1.0",
+  "description": "Native-speed TypeScript/JavaScript API documentation generator powered by OXC",
+  "type": "module",
+  "bin": {
+    "oxdoc": "./dist/cli/index.js"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/lib/index.js",
+      "types": "./dist/lib/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit",
+    "oxdoc": "tsx src/cli/index.ts"
+  },
+  "keywords": [
+    "typescript",
+    "documentation",
+    "jsdoc",
+    "tsdoc",
+    "oxc",
+    "api-docs"
+  ],
+  "author": "jiji-hoon96",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jiji-hoon96/oxdoc.git"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "chalk": "^5.6.2",
+    "commander": "^14.0.3",
+    "comment-parser": "^1.4.5",
+    "fast-glob": "^3.3.3",
+    "oxc-parser": "^0.121.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "@vitest/coverage-v8": "^4.1.2",
+    "tsup": "^8.5.1",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.2"
+  }
+}
