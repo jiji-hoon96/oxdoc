@@ -18,3 +18,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `parseProject()` for multi-file project parsing
 - JSDoc-to-AST node matching with whitespace-aware proximity detection
 - Support for function, class, interface, type, enum, variable symbol extraction
+- CLI tool with `oxdoc generate` command (JSON and Markdown output)
+- JSON generator (`generateJSON`)
+- Markdown generator with parameter tables, returns, examples (`generateMarkdown`)

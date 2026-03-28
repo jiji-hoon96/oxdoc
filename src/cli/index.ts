@@ -1,3 +1,14 @@
 #!/usr/bin/env node
-// CLI 진입점 - Phase 5에서 구현
-console.log("oxdoc CLI - coming soon");
+import { Command } from "commander";
+import { generateCommand } from "./commands/generate.js";
+import { coverageCommand } from "./commands/coverage.js";
+
+const program = new Command()
+  .name("oxdoc")
+  .description("Native-speed TypeScript/JavaScript API documentation generator")
+  .version("0.1.0");
+
+program.addCommand(generateCommand);
+program.addCommand(coverageCommand);
+
+program.parse();

@@ -1,4 +1,4 @@
-import { glob } from "fast-glob";
+import fg from "fast-glob";
 import { readFile } from "node:fs/promises";
 
 const DEFAULT_INCLUDE = ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"];
@@ -22,7 +22,7 @@ export async function findSourceFiles(
   const include = options.include ?? DEFAULT_INCLUDE;
   const exclude = options.exclude ?? DEFAULT_EXCLUDE;
 
-  return glob(include, {
+  return fg(include, {
     cwd: sourceRoot,
     ignore: exclude,
     absolute: true,
