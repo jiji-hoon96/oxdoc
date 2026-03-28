@@ -23,3 +23,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Markdown generator with parameter tables, returns, examples (`generateMarkdown`)
 - Documentation coverage checker (`calculateCoverage`) with by-kind and by-file stats
 - `oxdoc coverage` CLI command with threshold check and text/json output
+- Doc test runner: `extractDocTests()` for @example block extraction
+- `runDocTests()` for executing code blocks with `// =>` assertion support
+- `oxdoc doctest` CLI command with --bail option

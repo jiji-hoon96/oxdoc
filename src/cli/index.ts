@@ -2,6 +2,7 @@
 import { Command } from "commander";
 import { generateCommand } from "./commands/generate.js";
 import { coverageCommand } from "./commands/coverage.js";
+import { doctestCommand } from "./commands/doctest.js";
 
 const program = new Command()
   .name("oxdoc")
@@ -10,5 +11,6 @@ const program = new Command()
 
 program.addCommand(generateCommand);
 program.addCommand(coverageCommand);
+program.addCommand(doctestCommand);
 
 program.parse();
