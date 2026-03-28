@@ -13,3 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Test fixtures for parser testing (simple-function, class, interface, no-docs)
 - `.claude` configuration with CLAUDE.md and skills (commit, test, changelog, documentation)
 - Docusaurus documentation site with ADRs
+- JSDoc parser using OXC (`parseSync`) and comment-parser
+- `parseFile()` and `parseSource()` for single file parsing
+- `parseProject()` for multi-file project parsing
+- JSDoc-to-AST node matching with whitespace-aware proximity detection
+- Support for function, class, interface, type, enum, variable symbol extraction
