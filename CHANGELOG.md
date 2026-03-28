@@ -21,3 +21,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CLI tool with `oxdoc generate` command (JSON and Markdown output)
 - JSON generator (`generateJSON`)
 - Markdown generator with parameter tables, returns, examples (`generateMarkdown`)
+- Documentation coverage checker (`calculateCoverage`) with by-kind and by-file stats
+- `oxdoc coverage` CLI command with threshold check and text/json output
