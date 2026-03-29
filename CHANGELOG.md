@@ -31,6 +31,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Configuration file system: oxdoc.config.json, .js, .mjs, package.json "oxdoc" field
 - `loadConfig()` and `mergeConfig()` with CLI flag override support
+- Plugin system: `OxdocPlugin` interface with transformSymbols, generateOutput, analyzeProject hooks
+- `runPlugins()` runner with ordered execution (transform → output → analyze)
 - Error reporting: `metadata.errors` collects parse failures with file path and message
 - `reportParseErrors()` utility for CLI warning output
 - npm publish preparation: files field, publishConfig, prepublishOnly script

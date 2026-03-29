@@ -5,6 +5,8 @@ import { parseProject } from "../../lib/parser/index.js";
 import { generateJSON } from "../../lib/generator/json.js";
 import { generateMarkdown } from "../../lib/generator/markdown.js";
 import { loadConfig } from "../../lib/config/index.js";
+import { runPlugins } from "../../lib/plugins/index.js";
+import type { OxdocPlugin } from "../../types/plugin.js";
 import { logger } from "../../lib/utils/logger.js";
 import { reportParseErrors } from "../../lib/utils/report-errors.js";
 
@@ -36,6 +38,32 @@ export const generateCommand = new Command("generate")
     logger.info(
       `Found ${project.files.length} files, ${totalSymbols} symbols`,
     );
+
+    // 플러그인 실행
+    const plugins = (config.plugins ?? []) as OxdocPlugin[];
+    if (plugins.length > 0) {
+      logger.info(`Running ${plugins.length} plugin(s)...`);
+      const pluginResults = runPlugins(plugins, project);
+
+      // 플러그인 출력 파일 저장
+      if (pluginResults.outputFiles.length > 0) {
+        mkdirSync(outputDir, { recursive: true });
+        for (const file of pluginResults.outputFiles) {
+          const outPath = join(outputDir, file.filename);
+          writeFileSync(outPath, file.content, "utf-8");
+          logger.success(`Plugin output: ${outPath}`);
+        }
+      }
+
+      // 분석 결과 출력
+      for (const result of pluginResults.analysisResults) {
+        logger.info(`[${result.pluginName}] ${result.summary}`);
+        for (const issue of result.issues) {
+          const prefix = issue.severity === "error" ? "✗" : issue.severity === "warning" ? "⚠" : "ℹ";
+          console.log(`  ${prefix} ${issue.message}`);
+        }
+      }
+    }
 
     mkdirSync(outputDir, { recursive: true });
 
