@@ -49,6 +49,12 @@ export interface FileDocumentation {
   fileDoc: DocComment | null;
 }
 
+/** 파싱 에러 정보 */
+export interface ParseError {
+  file: string;
+  message: string;
+}
+
 /** 프로젝트 전체 문서 */
 export interface ProjectDocumentation {
   files: FileDocumentation[];
@@ -56,6 +62,7 @@ export interface ProjectDocumentation {
     generatedAt: string;
     version: string;
     sourceRoot: string;
+    errors: ParseError[];
   };
 }
 

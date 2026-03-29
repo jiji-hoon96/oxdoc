@@ -4,6 +4,7 @@ import { parseProject } from "../../lib/parser/index.js";
 import { calculateCoverage } from "../../lib/analyzer/coverage.js";
 import { loadConfig } from "../../lib/config/index.js";
 import { logger } from "../../lib/utils/logger.js";
+import { reportParseErrors } from "../../lib/utils/report-errors.js";
 import chalk from "chalk";
 
 export const coverageCommand = new Command("coverage")
@@ -18,6 +19,7 @@ export const coverageCommand = new Command("coverage")
     const threshold = options.threshold != null ? parseFloat(options.threshold) : config.coverage.threshold;
 
     const project = await parseProject(sourceRoot);
+    reportParseErrors(project.metadata.errors);
     const report = calculateCoverage(project, {
       exportedOnly: !options.all,
       threshold,

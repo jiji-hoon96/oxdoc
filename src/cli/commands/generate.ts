@@ -6,6 +6,7 @@ import { generateJSON } from "../../lib/generator/json.js";
 import { generateMarkdown } from "../../lib/generator/markdown.js";
 import { loadConfig } from "../../lib/config/index.js";
 import { logger } from "../../lib/utils/logger.js";
+import { reportParseErrors } from "../../lib/utils/report-errors.js";
 
 export const generateCommand = new Command("generate")
   .description("Generate API documentation from source files")
@@ -26,6 +27,7 @@ export const generateCommand = new Command("generate")
     logger.info(`Parsing source files from ${sourceRoot}...`);
 
     const project = await parseProject(sourceRoot, { include, exclude });
+    reportParseErrors(project.metadata.errors);
 
     const totalSymbols = project.files.reduce(
       (sum, f) => sum + f.symbols.length,

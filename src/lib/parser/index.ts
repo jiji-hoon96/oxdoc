@@ -7,6 +7,7 @@ import type {
   DocumentedSymbol,
   FileDocumentation,
   ProjectDocumentation,
+  ParseError,
   SymbolKind,
   DocComment,
 } from "../../types/index.js";
@@ -95,6 +96,7 @@ export async function parseProject(
   // 파일을 배치로 병렬 처리
   const BATCH_SIZE = 50;
   const fileDocs: FileDocumentation[] = [];
+  const errors: ParseError[] = [];
 
   for (let i = 0; i < files.length; i += BATCH_SIZE) {
     const batch = files.slice(i, i + BATCH_SIZE);
@@ -103,14 +105,19 @@ export async function parseProject(
         try {
           const doc = parseFile(file);
           doc.filePath = relative(sourceRoot, file);
-          return doc;
-        } catch {
-          return null;
+          return { doc, error: null };
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          return {
+            doc: null,
+            error: { file: relative(sourceRoot, file), message },
+          };
         }
       }),
     );
-    for (const doc of results) {
-      if (doc) fileDocs.push(doc);
+    for (const result of results) {
+      if (result.doc) fileDocs.push(result.doc);
+      if (result.error) errors.push(result.error);
     }
   }
 
@@ -120,6 +127,7 @@ export async function parseProject(
       generatedAt: new Date().toISOString(),
       version: "0.1.0",
       sourceRoot,
+      errors,
     },
   };
 }
