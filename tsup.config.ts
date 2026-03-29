@@ -1,21 +1,21 @@
 import { defineConfig } from "tsup";
 
-export default defineConfig({
-  entry: {
-    "lib/index": "src/lib/index.ts",
-    "cli/index": "src/cli/index.ts",
+export default defineConfig([
+  {
+    entry: { "lib/index": "src/lib/index.ts" },
+    format: ["esm"],
+    dts: true,
+    splitting: true,
+    clean: true,
+    target: "node20",
   },
-  format: ["esm"],
-  dts: true,
-  splitting: true,
-  clean: true,
-  target: "node20",
-  banner: ({ format }) => {
-    if (format === "esm") {
-      return {
-        js: '#!/usr/bin/env node',
-      };
-    }
-    return {};
+  {
+    entry: { "cli/index": "src/cli/index.ts" },
+    format: ["esm"],
+    dts: false,
+    splitting: true,
+    clean: false,
+    target: "node20",
+    banner: { js: "#!/usr/bin/env node" },
   },
-});
+]);

@@ -12,6 +12,14 @@
       "types": "./dist/lib/index.d.ts"
     }
   },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
@@ -20,6 +28,7 @@
     "test:coverage": "vitest run --coverage",
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm build && pnpm test",
     "oxdoc": "tsx src/cli/index.ts"
   },
   "keywords": [

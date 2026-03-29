@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 import { Command } from "commander";
 import { generateCommand } from "./commands/generate.js";
 import { coverageCommand } from "./commands/coverage.js";

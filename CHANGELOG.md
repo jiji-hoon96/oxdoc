@@ -29,5 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Docusaurus usage guides: getting-started, CLI reference, CI integration
 - Batch parallel file processing in `parseProject()` (50 files per batch)
 
+- npm publish preparation: files field, publishConfig, prepublishOnly script
+
 ### Changed
 - README.md expanded with full CLI documentation and architecture diagram
+- tsup config split to apply shebang only to CLI entry point
