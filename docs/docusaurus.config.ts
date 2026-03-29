@@ -19,6 +19,17 @@ const config: Config = {
 
   onBrokenLinks: 'throw',
 
+  headTags: [
+    {
+      tagName: 'link',
+      attributes: { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+    },
+    {
+      tagName: 'link',
+      attributes: { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: 'anonymous' },
+    },
+  ],
+
   i18n: {
     defaultLocale: 'ko',
     locales: ['ko', 'en'],
@@ -55,6 +66,11 @@ const config: Config = {
       defaultMode: 'dark',
       respectPrefersColorScheme: true,
     },
+    announcementBar: {
+      id: 'beta',
+      content: 'oxdoc is in active development. <a href="https://github.com/jiji-hoon96/oxdoc" target="_blank" rel="noopener noreferrer">Star us on GitHub</a>!',
+      isCloseable: true,
+    },
     navbar: {
       title: 'oxdoc',
       items: [
@@ -67,8 +83,9 @@ const config: Config = {
         {to: '/blog', label: 'Blog', position: 'left'},
         {
           href: 'https://github.com/jiji-hoon96/oxdoc',
-          label: 'GitHub',
           position: 'right',
+          className: 'header-github-link',
+          'aria-label': 'GitHub repository',
         },
       ],
     },
