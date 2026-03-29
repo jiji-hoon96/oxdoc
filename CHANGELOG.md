@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `loadConfig()` and `mergeConfig()` with CLI flag override support
 - Plugin system: `OxdocPlugin` interface with transformSymbols, generateOutput, analyzeProject hooks
 - `runPlugins()` runner with ordered execution (transform → output → analyze)
+- llms.txt output format for AI/LLM-friendly documentation (`--format llms-txt`)
 - Error reporting: `metadata.errors` collects parse failures with file path and message
 - `reportParseErrors()` utility for CLI warning output
 - npm publish preparation: files field, publishConfig, prepublishOnly script

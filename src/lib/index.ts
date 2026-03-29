@@ -4,6 +4,7 @@ export { calculateCoverage } from "./analyzer/coverage.js";
 export { extractDocTests, runDocTests } from "./analyzer/doctest.js";
 export { generateJSON } from "./generator/json.js";
 export { generateMarkdown } from "./generator/markdown.js";
+export { generateLlmsTxt } from "./generator/llms-txt.js";
 export { loadConfig, mergeConfig } from "./config/index.js";
 export { runPlugins } from "./plugins/index.js";
 export type { OxdocConfig } from "./config/index.js";

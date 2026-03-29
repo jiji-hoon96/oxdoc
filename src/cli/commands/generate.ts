@@ -4,6 +4,7 @@ import { resolve, join } from "node:path";
 import { parseProject } from "../../lib/parser/index.js";
 import { generateJSON } from "../../lib/generator/json.js";
 import { generateMarkdown } from "../../lib/generator/markdown.js";
+import { generateLlmsTxt } from "../../lib/generator/llms-txt.js";
 import { loadConfig } from "../../lib/config/index.js";
 import { runPlugins } from "../../lib/plugins/index.js";
 import type { OxdocPlugin } from "../../types/plugin.js";
@@ -77,8 +78,13 @@ export const generateCommand = new Command("generate")
       const outPath = join(outputDir, "api.md");
       writeFileSync(outPath, output, "utf-8");
       logger.success(`Markdown documentation written to ${outPath}`);
+    } else if (format === "llms-txt" || format === "llms") {
+      const output = generateLlmsTxt(project);
+      const outPath = join(outputDir, "llms.txt");
+      writeFileSync(outPath, output, "utf-8");
+      logger.success(`llms.txt documentation written to ${outPath}`);
     } else {
-      logger.error(`Unknown format: ${format}. Use 'json' or 'markdown'.`);
+      logger.error(`Unknown format: ${format}. Use 'json', 'markdown', or 'llms-txt'.`);
       process.exit(1);
     }
   });
