@@ -44,3 +44,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - README.md expanded with full CLI documentation and architecture diagram
 - tsup config split to apply shebang only to CLI entry point
+- Deployment: GitHub Pages → Vercel (`vercel.json` added)
+- All yarn references replaced with pnpm across documentation
+- Documentation URL updated to `https://oxdoc.vercel.app`

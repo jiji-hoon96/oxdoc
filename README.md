@@ -97,7 +97,7 @@ oxdoc은 OXC 파서로 이 문제를 해결합니다.
 
 ## Documentation
 
-[oxdoc 문서 사이트](https://jiji-hoon96.github.io/oxdoc/)에서 상세 가이드를 확인하세요.
+[oxdoc 문서 사이트](https://oxdoc.vercel.app)에서 상세 가이드를 확인하세요.
 
 ## License
 

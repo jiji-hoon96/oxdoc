@@ -11,8 +11,8 @@ const config: Config = {
     v4: true,
   },
 
-  url: 'https://jiji-hoon96.github.io',
-  baseUrl: '/oxdoc/',
+  url: 'https://oxdoc.vercel.app',
+  baseUrl: '/',
 
   organizationName: 'jiji-hoon96',
   projectName: 'oxdoc',
