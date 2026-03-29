@@ -91,16 +91,26 @@ export async function parseProject(
   options?: { include?: string[]; exclude?: string[] },
 ): Promise<ProjectDocumentation> {
   const files = await findSourceFiles(sourceRoot, options);
+
+  // 파일을 배치로 병렬 처리
+  const BATCH_SIZE = 50;
   const fileDocs: FileDocumentation[] = [];
 
-  for (const file of files) {
-    try {
-      const doc = parseFile(file);
-      // 상대 경로로 변환
-      doc.filePath = relative(sourceRoot, file);
-      fileDocs.push(doc);
-    } catch {
-      // 파싱 실패한 파일은 건너뛰기
+  for (let i = 0; i < files.length; i += BATCH_SIZE) {
+    const batch = files.slice(i, i + BATCH_SIZE);
+    const results = await Promise.all(
+      batch.map(async (file) => {
+        try {
+          const doc = parseFile(file);
+          doc.filePath = relative(sourceRoot, file);
+          return doc;
+        } catch {
+          return null;
+        }
+      }),
+    );
+    for (const doc of results) {
+      if (doc) fileDocs.push(doc);
     }
   }
 

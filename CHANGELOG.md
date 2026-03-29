@@ -26,3 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Doc test runner: `extractDocTests()` for @example block extraction
 - `runDocTests()` for executing code blocks with `// =>` assertion support
 - `oxdoc doctest` CLI command with --bail option
+- Docusaurus usage guides: getting-started, CLI reference, CI integration
+- Batch parallel file processing in `parseProject()` (50 files per batch)
+
+### Changed
+- README.md expanded with full CLI documentation and architecture diagram
