@@ -35,7 +35,7 @@ function makeProjectWithExample(
         ],
       },
     ],
-    metadata: { generatedAt: "", version: "0.1.0", sourceRoot: "/src" },
+    metadata: { generatedAt: "", version: "0.1.0", sourceRoot: "/src", errors: [] },
   };
 }
 
@@ -105,7 +105,7 @@ describe("extractDocTests", () => {
           ],
         },
       ],
-      metadata: { generatedAt: "", version: "0.1.0", sourceRoot: "/src" },
+      metadata: { generatedAt: "", version: "0.1.0", sourceRoot: "/src", errors: [] },
     };
 
     const tests = extractDocTests(project);
@@ -130,7 +130,7 @@ describe("extractDocTests", () => {
           ],
         },
       ],
-      metadata: { generatedAt: "", version: "0.1.0", sourceRoot: "/src" },
+      metadata: { generatedAt: "", version: "0.1.0", sourceRoot: "/src", errors: [] },
     };
 
     const tests = extractDocTests(project);

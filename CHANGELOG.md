@@ -41,6 +41,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `reportParseErrors()` utility for CLI warning output
 - npm publish preparation: files field, publishConfig, prepublishOnly script
 
+### Fixed
+- JSDoc @example blocks now preserve newlines (`spacing: 'preserve'`)
+- Method signatures no longer include function body (MethodDefinition body detection fix)
+- JSDoc description/tag trailing whitespace trimmed
+- Test data `metadata.errors` field added to all test helpers
+- CLI reference docs updated for `--format llms-txt` and `--watch` options
+
 ### Changed
 - Complete Docusaurus theme redesign: dark hero, terminal preview, feature cards, benchmark bars
 - Custom CSS: Inter + JetBrains Mono fonts, blue color scheme, code-focused styling

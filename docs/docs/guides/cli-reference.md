@@ -15,8 +15,9 @@ oxdoc generate [path] [options]
 | 인자/옵션 | 설명 | 기본값 |
 |-----------|------|--------|
 | `[path]` | 소스 디렉토리 경로 | `./src` |
-| `-f, --format <format>` | 출력 형식 (`json`, `markdown`) | `json` |
+| `-f, --format <format>` | 출력 형식 (`json`, `markdown`, `llms-txt`) | `json` |
 | `-o, --output <dir>` | 출력 디렉토리 | `./docs-output` |
+| `-w, --watch` | 파일 변경 감지 시 자동 재생성 | `false` |
 | `--include <patterns...>` | 포함할 glob 패턴 | `**/*.{ts,tsx,js,jsx}` |
 | `--exclude <patterns...>` | 제외할 glob 패턴 | `**/*.test.*`, `**/node_modules/**` |
 
@@ -31,6 +32,12 @@ oxdoc generate ./lib --format markdown --output ./api-docs
 
 # 특정 파일만 포함
 oxdoc generate ./src --include "**/*.ts" --exclude "**/*.internal.*"
+
+# AI 친화적 llms.txt 형식으로 생성
+oxdoc generate ./src --format llms-txt
+
+# Watch 모드 (파일 변경 시 자동 재생성)
+oxdoc generate ./src --format markdown --watch
 ```
 
 ---

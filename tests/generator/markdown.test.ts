@@ -29,7 +29,7 @@ describe("generateMarkdown", () => {
           ],
         },
       ],
-      metadata: { generatedAt: "2026-03-28", version: "0.1.0", sourceRoot: "/src" },
+      metadata: { generatedAt: "2026-03-28", version: "0.1.0", sourceRoot: "/src", errors: [] },
     };
 
     const md = generateMarkdown(project);
@@ -61,7 +61,7 @@ describe("generateMarkdown", () => {
           ],
         },
       ],
-      metadata: { generatedAt: "2026-03-28", version: "0.1.0", sourceRoot: "/src" },
+      metadata: { generatedAt: "2026-03-28", version: "0.1.0", sourceRoot: "/src", errors: [] },
     };
 
     const md = generateMarkdown(project);
@@ -97,7 +97,7 @@ describe("generateMarkdown", () => {
           ],
         },
       ],
-      metadata: { generatedAt: "2026-03-28", version: "0.1.0", sourceRoot: "/src" },
+      metadata: { generatedAt: "2026-03-28", version: "0.1.0", sourceRoot: "/src", errors: [] },
     };
 
     const md = generateMarkdown(project);

@@ -13,7 +13,7 @@ export function parseJSDoc(
 ): DocComment {
   // OXC의 value는 /* 와 */ 사이의 내용이므로 다시 감싸준다
   const wrapped = `/*${rawComment}*/`;
-  const parsed = commentParse(wrapped);
+  const parsed = commentParse(wrapped, { spacing: "preserve" });
 
   if (parsed.length === 0) {
     return { description: "", tags: [], range };
@@ -34,7 +34,7 @@ export function parseJSDoc(
     }
 
     // "@param a - 설명" 형태에서 description의 선행 "- "를 제거
-    description = description.replace(/^-\s*/, "");
+    description = description.replace(/^-\s*/, "").trim();
 
     return {
       tag: tag.tag,
@@ -47,7 +47,7 @@ export function parseJSDoc(
   });
 
   return {
-    description: block.description,
+    description: block.description.trim(),
     tags,
     range,
   };

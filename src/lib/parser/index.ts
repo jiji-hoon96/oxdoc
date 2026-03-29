@@ -342,6 +342,18 @@ function extractSignature(source: string, node: AstNode): string {
   if (node.body && typeof node.body.start === "number") {
     end = node.body.start;
   }
+  // MethodDefinition: body는 node.value.body에 위치
+  if (node.value?.body && typeof node.value.body.start === "number") {
+    end = node.value.body.start;
+  }
+  // PropertyDefinition: value 부분 제거 (= 이후)
+  if (node.type === "PropertyDefinition" && node.value) {
+    const text = source.slice(start, end);
+    const eqIndex = text.indexOf("=");
+    if (eqIndex !== -1) {
+      return text.slice(0, eqIndex).trim();
+    }
+  }
 
   // VariableDeclaration은 전체를 포함하되 초기화 값은 잘라냄
   if (node.type === "VariableDeclaration") {

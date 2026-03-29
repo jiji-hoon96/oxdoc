@@ -22,7 +22,7 @@ function makeProject(
         })),
       },
     ],
-    metadata: { generatedAt: "", version: "0.1.0", sourceRoot: "/src" },
+    metadata: { generatedAt: "", version: "0.1.0", sourceRoot: "/src", errors: [] },
   };
 }
 
@@ -102,7 +102,7 @@ describe("calculateCoverage", () => {
   it("심볼이 없으면 커버리지 100%", () => {
     const project: ProjectDocumentation = {
       files: [],
-      metadata: { generatedAt: "", version: "0.1.0", sourceRoot: "/src" },
+      metadata: { generatedAt: "", version: "0.1.0", sourceRoot: "/src", errors: [] },
     };
 
     const report = calculateCoverage(project);

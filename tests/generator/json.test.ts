@@ -25,7 +25,7 @@ describe("generateJSON", () => {
           ],
         },
       ],
-      metadata: { generatedAt: "2026-03-28", version: "0.1.0", sourceRoot: "/src" },
+      metadata: { generatedAt: "2026-03-28", version: "0.1.0", sourceRoot: "/src", errors: [] },
     };
 
     const json = generateJSON(project);
@@ -39,7 +39,7 @@ describe("generateJSON", () => {
   it("빈 프로젝트를 처리한다", () => {
     const project: ProjectDocumentation = {
       files: [],
-      metadata: { generatedAt: "2026-03-28", version: "0.1.0", sourceRoot: "/src" },
+      metadata: { generatedAt: "2026-03-28", version: "0.1.0", sourceRoot: "/src", errors: [] },
     };
 
     const json = generateJSON(project);
