@@ -29,6 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Docusaurus usage guides: getting-started, CLI reference, CI integration
 - Batch parallel file processing in `parseProject()` (50 files per batch)
 
+- Configuration file system: oxdoc.config.json, .js, .mjs, package.json "oxdoc" field
+- `loadConfig()` and `mergeConfig()` with CLI flag override support
 - npm publish preparation: files field, publishConfig, prepublishOnly script
 
 ### Changed

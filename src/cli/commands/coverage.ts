@@ -2,18 +2,20 @@ import { Command } from "commander";
 import { resolve } from "node:path";
 import { parseProject } from "../../lib/parser/index.js";
 import { calculateCoverage } from "../../lib/analyzer/coverage.js";
+import { loadConfig } from "../../lib/config/index.js";
 import { logger } from "../../lib/utils/logger.js";
 import chalk from "chalk";
 
 export const coverageCommand = new Command("coverage")
   .description("Check documentation coverage")
-  .argument("[path]", "Source directory path", "./src")
-  .option("-t, --threshold <percent>", "Minimum coverage threshold (%)", "0")
+  .argument("[path]", "Source directory path")
+  .option("-t, --threshold <percent>", "Minimum coverage threshold (%)")
   .option("--all", "Include non-exported symbols", false)
   .option("--format <format>", "Output format (text, json)", "text")
-  .action(async (sourcePath: string, options) => {
-    const sourceRoot = resolve(sourcePath);
-    const threshold = parseFloat(options.threshold);
+  .action(async (sourcePath: string | undefined, options) => {
+    const config = await loadConfig();
+    const sourceRoot = resolve(sourcePath ?? config.sourceRoot);
+    const threshold = options.threshold != null ? parseFloat(options.threshold) : config.coverage.threshold;
 
     const project = await parseProject(sourceRoot);
     const report = calculateCoverage(project, {
