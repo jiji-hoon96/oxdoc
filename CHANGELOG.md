@@ -42,6 +42,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - npm publish preparation: files field, publishConfig, prepublishOnly script
 
 ### Changed
+- Complete Docusaurus theme redesign: dark hero, terminal preview, feature cards, benchmark bars
+- Custom CSS: Inter + JetBrains Mono fonts, blue color scheme, code-focused styling
 - README.md expanded with full CLI documentation and architecture diagram
 - tsup config split to apply shebang only to CLI entry point
 - Deployment: GitHub Pages → Vercel (`vercel.json` added)

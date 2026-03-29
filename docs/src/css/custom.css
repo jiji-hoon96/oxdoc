@@ -1,30 +1,154 @@
-/**
- * Any CSS included here will be global. The classic template
- * bundles Infima by default. Infima is a CSS framework designed to
- * work well for content-centric websites.
- */
+/* oxdoc - Developer Tool Documentation Theme */
 
-/* You can override the default Infima variables here. */
+/* === Color Palette === */
+/* Primary: Electric Blue - 속도와 정밀함을 상징 */
 :root {
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-darker: #277148;
-  --ifm-color-primary-darkest: #205d3b;
-  --ifm-color-primary-light: #33925d;
-  --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
-  --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --ifm-color-primary: #3b82f6;
+  --ifm-color-primary-dark: #2563eb;
+  --ifm-color-primary-darker: #1d4ed8;
+  --ifm-color-primary-darkest: #1e40af;
+  --ifm-color-primary-light: #60a5fa;
+  --ifm-color-primary-lighter: #93bbfd;
+  --ifm-color-primary-lightest: #bfdbfe;
+
+  --ifm-code-font-size: 92%;
+  --ifm-font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --ifm-font-family-monospace: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  --ifm-heading-font-weight: 700;
+  --ifm-font-weight-bold: 600;
+
+  --ifm-navbar-height: 64px;
+  --ifm-navbar-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+
+  --docusaurus-highlighted-code-line-bg: rgba(59, 130, 246, 0.1);
+
+  --oxdoc-hero-bg: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+  --oxdoc-hero-text: #f8fafc;
+  --oxdoc-card-bg: #f8fafc;
+  --oxdoc-card-border: #e2e8f0;
+  --oxdoc-badge-bg: #eff6ff;
+  --oxdoc-badge-text: #1d4ed8;
+  --oxdoc-terminal-bg: #0f172a;
+  --oxdoc-terminal-text: #e2e8f0;
+  --oxdoc-accent: #f59e0b;
 }
 
-/* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+  --ifm-color-primary: #60a5fa;
+  --ifm-color-primary-dark: #3b82f6;
+  --ifm-color-primary-darker: #2563eb;
+  --ifm-color-primary-darkest: #1d4ed8;
+  --ifm-color-primary-light: #93bbfd;
+  --ifm-color-primary-lighter: #bfdbfe;
+  --ifm-color-primary-lightest: #dbeafe;
+
+  --ifm-background-color: #0f172a;
+  --ifm-background-surface-color: #1e293b;
+  --ifm-navbar-background-color: #0f172aee;
+
+  --docusaurus-highlighted-code-line-bg: rgba(96, 165, 250, 0.15);
+
+  --oxdoc-card-bg: #1e293b;
+  --oxdoc-card-border: #334155;
+  --oxdoc-badge-bg: #1e3a5f;
+  --oxdoc-badge-text: #60a5fa;
+}
+
+/* === Typography === */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: -0.02em;
+}
+
+/* === Navbar === */
+.navbar {
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--ifm-toc-border-color);
+}
+
+.navbar__title {
+  font-weight: 800;
+  font-size: 1.2rem;
+  letter-spacing: -0.03em;
+}
+
+/* === Code Blocks === */
+.prism-code {
+  border-radius: 8px !important;
+  border: 1px solid var(--oxdoc-card-border);
+}
+
+code {
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-weight: 500;
+}
+
+/* === Sidebar === */
+.theme-doc-sidebar-menu .menu__link {
+  font-size: 0.9rem;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.theme-doc-sidebar-menu .menu__link:hover {
+  background: var(--oxdoc-badge-bg);
+}
+
+.theme-doc-sidebar-menu .menu__link--active {
+  font-weight: 600;
+}
+
+/* === Doc Page === */
+.markdown h1:first-child {
+  font-size: 2rem;
+}
+
+.markdown table {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--oxdoc-card-border);
+}
+
+.markdown table th {
+  background: var(--oxdoc-badge-bg);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* === Footer === */
+.footer {
+  border-top: 1px solid var(--oxdoc-card-border);
+}
+
+.footer--dark {
+  background: #0c1222;
+}
+
+/* === Admonitions === */
+.admonition {
+  border-radius: 8px;
+  border-left-width: 4px;
+}
+
+/* === Scrollbar (dark theme) === */
+[data-theme='dark'] ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 4px;
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
 }

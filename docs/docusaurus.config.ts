@@ -52,6 +52,7 @@ const config: Config = {
 
   themeConfig: {
     colorMode: {
+      defaultMode: 'dark',
       respectPrefersColorScheme: true,
     },
     navbar: {
@@ -75,33 +76,34 @@ const config: Config = {
       style: 'dark',
       links: [
         {
-          title: 'Docs',
+          title: 'Documentation',
           items: [
-            {
-              label: 'Getting Started',
-              to: '/docs/intro',
-            },
+            {label: 'Getting Started', to: '/docs/guides/getting-started'},
+            {label: 'CLI Reference', to: '/docs/guides/cli-reference'},
+            {label: 'CI Integration', to: '/docs/guides/ci-integration'},
           ],
         },
         {
-          title: 'More',
+          title: 'Resources',
           items: [
-            {
-              label: 'Blog',
-              to: '/blog',
-            },
-            {
-              label: 'GitHub',
-              href: 'https://github.com/jiji-hoon96/oxdoc',
-            },
+            {label: 'Blog', to: '/blog'},
+            {label: 'Architecture Decisions', to: '/docs/adr/oxc-parser'},
+          ],
+        },
+        {
+          title: 'Community',
+          items: [
+            {label: 'GitHub', href: 'https://github.com/jiji-hoon96/oxdoc'},
+            {label: 'Issues', href: 'https://github.com/jiji-hoon96/oxdoc/issues'},
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} oxdoc. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} oxdoc — Native-speed API documentation generator`,
     },
     prism: {
       theme: prismThemes.github,
       darkTheme: prismThemes.dracula,
+      additionalLanguages: ['bash', 'json', 'yaml'],
     },
   } satisfies Preset.ThemeConfig,
 };
