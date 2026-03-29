@@ -29,7 +29,8 @@
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "pnpm build && pnpm test",
-    "oxdoc": "tsx src/cli/index.ts"
+    "oxdoc": "tsx src/cli/index.ts",
+    "bench": "tsx benchmarks/run.ts"
   },
   "keywords": [
     "typescript",

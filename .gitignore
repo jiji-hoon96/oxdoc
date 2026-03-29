@@ -10,3 +10,4 @@ tmp/
 .docusaurus/
 build/
 .turbo/
+benchmarks/fixtures/
