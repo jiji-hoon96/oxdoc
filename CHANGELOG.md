@@ -8,6 +8,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Documentation pages: Configuration, Plugin API, Output Formats, Benchmarks guides
+- Homepage benchmark visualization with CSS animations and tab-based scenario switching
+- CTA section on homepage
+- Korean i18n support via Docusaurus locale dropdown
+- `README.ko.md` Korean README
+
+### Changed
+- Default documentation locale switched from Korean to English
+- Homepage fully translated to English with improved benchmark UI
+- All documentation pages translated to English (Korean available via locale switcher)
+- `README.md` rewritten in English with badges, expanded benchmarks, configuration section
+
+### Fixed
+- `OxdocConfig.output.format` type now includes `"html"` (was missing)
+- CLI reference now lists `html` as a valid format for `oxdoc generate`
+
+### Previously Added
 - HTML output format: `oxdoc generate --format html` — single-page API docs with sidebar navigation, search, dark theme
 - JSON reporter for doctest: `oxdoc doctest --reporter json` for CI pipeline parsing
 - Doctest: resolve tsx from oxdoc's own dependencies (not target project)

@@ -1,29 +1,37 @@
 # oxdoc
 
+[![npm version](https://img.shields.io/npm/v/@jiji-hoon96/oxdoc)](https://www.npmjs.com/package/@jiji-hoon96/oxdoc)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D20-brightgreen)](https://nodejs.org/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+
+[한국어](./README.ko.md)
+
 Native-speed TypeScript/JavaScript API documentation generator powered by [OXC](https://oxc.rs/).
 
 ## Features
 
-- **OXC Parser** - Rust NAPI 바인딩 기반 초고속 파싱 (Babel 대비 10-50x)
-- **JSDoc/TSDoc 추출** - 소스 코드에서 API 문서 자동 생성 (JSON, Markdown, HTML, llms.txt)
-- **문서 커버리지** - export된 심볼의 문서화 비율 측정 (CI 연동)
-- **Doc Test** - `@example` 블록의 코드를 실제 실행하여 검증
-- **HTML 문서** - 사이드바, 검색, 다크 테마를 갖춘 단일 페이지 API 문서
+- **OXC Parser** - Blazing-fast parsing via Rust NAPI bindings (10-50x faster than Babel)
+- **JSDoc/TSDoc Extraction** - Auto-generate API docs from source code (JSON, Markdown, HTML, llms.txt)
+- **Documentation Coverage** - Measure doc coverage of exported symbols (CI integration)
+- **Doc Test** - Execute and validate `@example` code blocks
+- **HTML Docs** - Standalone single-page API docs with sidebar, search, and dark theme
+- **Plugin System** - Extensible via Transform, Output, and Analyzer hooks
+- **Watch Mode** - Auto-regenerate docs on file changes
 
 ## Quick Start
 
 ```bash
-# 설치
-pnpm add -D oxdoc
+# Install
+pnpm add -D @jiji-hoon96/oxdoc
 
-# API 문서 생성
-npx oxdoc generate ./src --format markdown --output ./api-docs
+# Generate API docs
+npx @jiji-hoon96/oxdoc generate ./src --format markdown --output ./api-docs
 
-# 문서 커버리지 체크 (80% 미달 시 CI 실패)
-npx oxdoc coverage ./src --threshold 80
+# Check documentation coverage (CI fails if below 80%)
+npx @jiji-hoon96/oxdoc coverage ./src --threshold 80
 
-# @example 블록 테스트
-npx oxdoc doctest ./src
+# Test @example blocks
+npx @jiji-hoon96/oxdoc doctest ./src
 ```
 
 ## CLI Commands
@@ -34,7 +42,15 @@ npx oxdoc doctest ./src
 oxdoc generate [path] --format json|markdown|html|llms-txt --output <dir>
 ```
 
-소스 파일에서 JSDoc/TSDoc을 추출하여 API 문서를 생성합니다.
+Extracts JSDoc/TSDoc from source files and generates API documentation.
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `-f, --format` | Output format (`json`, `markdown`, `html`, `llms-txt`) | `json` |
+| `-o, --output` | Output directory | `./docs-output` |
+| `-w, --watch` | Auto-regenerate on file changes | `false` |
+| `--include` | Include glob patterns | `**/*.{ts,tsx,js,jsx}` |
+| `--exclude` | Exclude glob patterns | `**/*.test.*`, `**/node_modules/**` |
 
 ### `oxdoc coverage`
 
@@ -42,7 +58,7 @@ oxdoc generate [path] --format json|markdown|html|llms-txt --output <dir>
 oxdoc coverage [path] --threshold 80 --format text|json
 ```
 
-문서 커버리지를 측정합니다. `--threshold` 미달 시 exit code 1을 반환하여 CI에서 활용 가능합니다.
+Measures documentation coverage. Returns exit code 1 when below threshold for CI usage.
 
 ```
   Documentation Coverage Report
@@ -60,10 +76,10 @@ oxdoc coverage [path] --threshold 80 --format text|json
 ### `oxdoc doctest`
 
 ```bash
-oxdoc doctest [path] --bail
+oxdoc doctest [path] --bail --reporter text|json
 ```
 
-`@example` 블록의 코드를 실행하여 `// =>` assertion을 검증합니다.
+Executes `@example` code blocks and validates `// =>` assertions.
 
 ```typescript
 /**
@@ -77,36 +93,64 @@ export function add(a: number, b: number): number {
 }
 ```
 
+## Benchmarks
+
+### es-toolkit (603 files)
+
+| | oxdoc | TypeDoc | Improvement |
+|---|---|---|---|
+| HTML Generation | **0.27s** | 2.36s | 8.7x faster |
+| JSON Generation | **0.25s** | 1.46s | 5.8x faster |
+| Memory Usage | **117MB** | 445MB | 3.8x less |
+
+### Large Scale (5,000 files / 15,000 symbols)
+
+| | oxdoc | TypeDoc | Improvement |
+|---|---|---|---|
+| Total Time | **0.9s** | ~60s+ | ~66x faster |
+| Memory Usage | **22MB** | ~2GB+ | ~90x less |
+
+## Configuration
+
+Create `oxdoc.config.json` in your project root:
+
+```json
+{
+  "sourceRoot": "./src",
+  "coverage": {
+    "threshold": 80
+  },
+  "output": {
+    "format": "html",
+    "dir": "./api-docs"
+  }
+}
+```
+
+See the [Configuration Guide](https://oxdoc.vercel.app/docs/guides/configuration) for all options.
+
 ## Architecture
 
 ```
-oxc-parser (Rust NAPI)  ← 네이티브 속도 파싱
+oxc-parser (Rust NAPI)  ← Native-speed parsing
        ↓
-oxdoc (TypeScript)      ← JSDoc 매칭, 분석, 출력 생성
+oxdoc (TypeScript)      ← JSDoc matching, analysis, output generation
 ```
 
-파싱(가장 무거운 연산)은 OXC의 Rust 바이너리가 처리하고, 분석/출력 레이어는 TypeScript로 유연하게 확장 가능합니다.
+Parsing (the heaviest operation) is handled by OXC's Rust binary, while the analysis/output layer is flexibly extensible in TypeScript.
 
 ## Why oxdoc?
 
-TypeDoc은 tsc에 의존하여 대형 프로젝트에서 심각한 문제가 발생합니다:
-- 110K LOC 모노레포에서 **12GB 메모리** 필요
-- 대형 프로젝트에서 **OOM 크래시**
-- 검색 인덱스 초기화에 **35초+ 소요**
+TypeDoc relies on tsc, causing serious issues in large projects:
+- Requires **12GB of memory** in a 110K LOC monorepo
+- **OOM crashes** in large projects
+- Search index initialization takes **35+ seconds**
 
-oxdoc은 OXC 파서로 이 문제를 해결합니다.
-
-### Benchmarks (es-toolkit, 603 files)
-
-| | oxdoc | TypeDoc | |
-|---|---|---|---|
-| HTML 생성 | **0.27s** | 2.36s | 8.7x faster |
-| JSON 생성 | **0.25s** | 1.46s | 5.8x faster |
-| 메모리 | **117MB** | 445MB | 3.8x less |
+oxdoc solves this with the OXC parser.
 
 ## Documentation
 
-[oxdoc 문서 사이트](https://oxdoc.vercel.app)에서 상세 가이드를 확인하세요.
+Visit the [documentation site](https://oxdoc.vercel.app) for detailed guides.
 
 ## License
 
