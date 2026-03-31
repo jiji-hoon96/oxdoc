@@ -10,7 +10,7 @@ export interface OxdocConfig {
     exportedOnly?: boolean;
   };
   output?: {
-    format?: "json" | "markdown" | "llms-txt";
+    format?: "json" | "markdown" | "html" | "llms-txt";
     dir?: string;
   };
   plugins?: unknown[];
