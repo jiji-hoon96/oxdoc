@@ -18,6 +18,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Korean i18n support via Docusaurus locale dropdown
 - `README.ko.md` Korean README
 
+### Security
+- Add SECURITY.md with vulnerability reporting policy
+- Add GitHub Actions CI workflow (test, build, typecheck on Node 20/22)
+- Add GitHub Actions publish workflow with npm provenance attestation
+- Add dependency security audit in CI pipeline
+- Enable npm provenance in publishConfig
+
 ### Changed
 - Default documentation locale switched from Korean to English
 - Homepage fully translated to English with improved benchmark UI
