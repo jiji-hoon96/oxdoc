@@ -5,6 +5,7 @@ import { parseProject } from "../../lib/parser/index.js";
 import { generateJSON } from "../../lib/generator/json.js";
 import { generateMarkdown } from "../../lib/generator/markdown.js";
 import { generateLlmsTxt } from "../../lib/generator/llms-txt.js";
+import { generateHTML } from "../../lib/generator/html.js";
 import { loadConfig } from "../../lib/config/index.js";
 import { runPlugins } from "../../lib/plugins/index.js";
 import { watchDirectory } from "../../lib/utils/watcher.js";
@@ -77,8 +78,13 @@ async function runGenerate(opts: GenerateOptions): Promise<void> {
     const outPath = join(opts.outputDir, "llms.txt");
     writeFileSync(outPath, output, "utf-8");
     logger.success(`llms.txt documentation written to ${outPath}`);
+  } else if (format === "html") {
+    const output = generateHTML(project);
+    const outPath = join(opts.outputDir, "index.html");
+    writeFileSync(outPath, output, "utf-8");
+    logger.success(`HTML documentation written to ${outPath}`);
   } else {
-    logger.error(`Unknown format: ${format}. Use 'json', 'markdown', or 'llms-txt'.`);
+    logger.error(`Unknown format: ${format}. Use 'json', 'markdown', 'html', or 'llms-txt'.`);
     process.exit(1);
   }
 }

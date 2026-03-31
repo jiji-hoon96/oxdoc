@@ -18,7 +18,10 @@ export const coverageCommand = new Command("coverage")
     const sourceRoot = resolve(sourcePath ?? config.sourceRoot);
     const threshold = options.threshold != null ? parseFloat(options.threshold) : config.coverage.threshold;
 
-    const project = await parseProject(sourceRoot);
+    const project = await parseProject(sourceRoot, {
+      include: config.include,
+      exclude: config.exclude,
+    });
     reportParseErrors(project.metadata.errors);
     const report = calculateCoverage(project, {
       exportedOnly: !options.all,

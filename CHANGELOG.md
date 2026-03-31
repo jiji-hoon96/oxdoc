@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- HTML output format: `oxdoc generate --format html` — single-page API docs with sidebar navigation, search, dark theme
+- JSON reporter for doctest: `oxdoc doctest --reporter json` for CI pipeline parsing
+- Doctest: resolve tsx from oxdoc's own dependencies (not target project)
+- Doctest: generate test files in project root for tsconfig paths support
+
+### Fixed
+- Coverage/doctest commands now pass config `include`/`exclude` to `parseProject`
+- Doctest no longer fails when target project doesn't have tsx installed
+- Doctest supports projects with tsconfig `paths` aliases
+
+### Previously Added
 - Project initialization with TypeScript, tsup, vitest
 - Core type definitions (DocumentedSymbol, DocComment, CoverageReport, DocTest)
 - Test fixtures for parser testing (simple-function, class, interface, no-docs)

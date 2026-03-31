@@ -1,8 +1,36 @@
 import { execSync } from "node:child_process";
-import { writeFileSync, mkdirSync, rmSync } from "node:fs";
-import { join } from "node:path";
-import { tmpdir } from "node:os";
+import { writeFileSync, mkdirSync, rmSync, existsSync } from "node:fs";
+import { join, dirname, relative } from "node:path";
+import { createRequire } from "node:module";
 import type { ProjectDocumentation, DocTest } from "../../types/index.js";
+
+const require = createRequire(import.meta.url);
+
+/**
+ * tsx 모듈의 절대 경로를 resolve한다.
+ * 대상 프로젝트에 tsx가 없어도 oxdoc의 dependency에서 찾는다.
+ */
+function resolveTsxPath(): string {
+  try {
+    return require.resolve("tsx");
+  } catch {
+    return "tsx";
+  }
+}
+
+/**
+ * sourceRoot에서 프로젝트 루트(tsconfig.json이 있는 디렉토리)를 찾는다.
+ */
+function findProjectRoot(sourceRoot: string): string {
+  let dir = sourceRoot;
+  while (dir !== dirname(dir)) {
+    if (existsSync(join(dir, "tsconfig.json"))) {
+      return dir;
+    }
+    dir = dirname(dir);
+  }
+  return sourceRoot;
+}
 
 /**
  * 프로젝트에서 @example 블록을 추출한다.
@@ -99,13 +127,14 @@ export function runDocTests(
   sourceRoot: string,
 ): DocTestResult[] {
   const results: DocTestResult[] = [];
-  const tmpDir = join(tmpdir(), `oxdoc-doctest-${Date.now()}`);
+  const projectRoot = findProjectRoot(sourceRoot);
+  const tmpDir = join(projectRoot, ".oxdoc-doctest-tmp");
   mkdirSync(tmpDir, { recursive: true });
 
   try {
     for (let i = 0; i < tests.length; i++) {
       const test = tests[i];
-      const result = runSingleDocTest(test, sourceRoot, tmpDir, i);
+      const result = runSingleDocTest(test, sourceRoot, projectRoot, tmpDir, i);
       results.push(result);
     }
   } finally {
@@ -122,16 +151,22 @@ export function runDocTests(
 function runSingleDocTest(
   test: DocTest,
   sourceRoot: string,
+  projectRoot: string,
   tmpDir: string,
   index: number,
 ): DocTestResult {
-  const testFile = join(tmpDir, `doctest_${index}.mts`);
+  const testFile = join(tmpDir, `doctest_${index}.ts`);
+
+  // sourceRoot 내의 파일 경로를 프로젝트 루트 기준 상대 경로로 변환
+  const absoluteFilePath = join(sourceRoot, test.filePath);
+  const relativeFromTmp = relative(tmpDir, absoluteFilePath);
+  // 확장자 제거 (.ts, .tsx, .js, .jsx)
+  const importPath = relativeFromTmp.replace(/\.(ts|tsx|js|jsx)$/, "");
 
   // assertion이 있으면 assert 코드 생성
   let testCode: string;
 
   if (test.assertions.length > 0) {
-    const importPath = join(sourceRoot, test.filePath);
     const assertLines = test.assertions.map(
       (a) =>
         `{ const __result = ${a.expression}; const __expected = ${a.expected}; if (JSON.stringify(__result) !== JSON.stringify(__expected)) { throw new Error(\`Expected \${JSON.stringify(__expected)}, got \${JSON.stringify(__result)}\`); } }`,
@@ -140,17 +175,17 @@ function runSingleDocTest(
     testCode = `import { ${test.symbolName} } from "${importPath}";\n${assertLines.join("\n")}`;
   } else {
     // assertion 없이 코드 실행만 확인
-    const importPath = join(sourceRoot, test.filePath);
     testCode = `import { ${test.symbolName} } from "${importPath}";\n${test.code}`;
   }
 
   writeFileSync(testFile, testCode, "utf-8");
 
   try {
-    execSync(`node --import tsx ${testFile}`, {
+    const tsxPath = resolveTsxPath();
+    execSync(`node --import ${tsxPath} ${testFile}`, {
       timeout: 10000,
       stdio: "pipe",
-      cwd: sourceRoot,
+      cwd: projectRoot,
     });
 
     return {
