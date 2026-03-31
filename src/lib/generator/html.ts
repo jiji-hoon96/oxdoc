@@ -5,15 +5,22 @@ import type {
   DocTag,
 } from "../../types/index.js";
 
+export interface HTMLGeneratorOptions {
+  /** Repository URL for source links (e.g. "https://github.com/user/repo") */
+  repository?: string;
+}
+
 /**
  * 프로젝트 문서를 단일 HTML 페이지로 생성한다.
  * @param project - 프로젝트 문서 정보
+ * @param options - HTML 생성 옵션
  * @returns HTML 문자열
  */
-export function generateHTML(project: ProjectDocumentation): string {
+export function generateHTML(project: ProjectDocumentation, options?: HTMLGeneratorOptions): string {
   const files = project.files.filter((f) => f.symbols.length > 0);
+  const repoUrl = options?.repository?.replace(/\/$/, "") || "";
   const nav = renderNav(files);
-  const content = files.map(renderFileHTML).join("\n");
+  const content = files.map((f) => renderFileHTML(f, repoUrl)).join("\n");
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -59,26 +66,30 @@ function renderNav(files: FileDocumentation[]): string {
     .join("");
 }
 
-function renderFileHTML(file: FileDocumentation): string {
+function renderFileHTML(file: FileDocumentation, repoUrl: string): string {
   const id = slugify(file.filePath);
   const exported = file.symbols.filter((s) => s.exported);
   const internal = file.symbols.filter((s) => !s.exported);
 
+  const fileLink = repoUrl
+    ? ` <a href="${repoUrl}/blob/main/${file.filePath}" target="_blank" rel="noopener" class="source-link">View Source</a>`
+    : "";
+
   let html = `<section id="${id}" class="file-section">
-  <h2>${escapeHtml(file.filePath)}</h2>`;
+  <h2>${escapeHtml(file.filePath)}${fileLink}</h2>`;
 
   if (file.fileDoc?.description) {
     html += `<p class="file-desc">${escapeHtml(file.fileDoc.description)}</p>`;
   }
 
   for (const sym of exported) {
-    html += renderSymbolHTML(sym, file.filePath);
+    html += renderSymbolHTML(sym, file.filePath, repoUrl);
   }
 
   if (internal.length > 0) {
     html += `<h3 class="internal-header">Internal</h3>`;
     for (const sym of internal) {
-      html += renderSymbolHTML(sym, file.filePath);
+      html += renderSymbolHTML(sym, file.filePath, repoUrl);
     }
   }
 
@@ -89,14 +100,20 @@ function renderFileHTML(file: FileDocumentation): string {
 function renderSymbolHTML(
   symbol: DocumentedSymbol,
   filePath: string,
+  repoUrl: string,
 ): string {
   const id = slugify(filePath + "-" + symbol.name);
   const kindClass = symbol.kind;
+
+  const lineLink = repoUrl
+    ? `<a href="${repoUrl}/blob/main/${filePath}#L${symbol.location.line}" target="_blank" rel="noopener" class="line-link">L${symbol.location.line}</a>`
+    : "";
 
   let html = `<article id="${id}" class="symbol ${kindClass}">
   <div class="symbol-header">
     <code class="signature">${escapeHtml(symbol.signature || symbol.name)}</code>
     <span class="kind-badge">${symbol.kind}</span>
+    ${lineLink}
   </div>`;
 
   if (symbol.doc) {
@@ -319,6 +336,20 @@ td code, th code { font-size: 12px; }
 .member code { font-size: 13px; }
 .member p { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
 .returns, .params, .members { margin-bottom: 12px; }
+.source-link, .line-link {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  transition: all 0.15s ease;
+}
+.source-link:hover, .line-link:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.file-section h2 { display: flex; align-items: center; gap: 8px; }
 @media (max-width: 768px) {
   .sidebar { display: none; }
   main { margin-left: 0; padding: 16px; }

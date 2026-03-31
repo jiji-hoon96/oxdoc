@@ -13,6 +13,8 @@ export interface OxdocConfig {
     format?: "json" | "markdown" | "html" | "llms-txt";
     dir?: string;
   };
+  /** Repository URL for source links in HTML output (e.g. "https://github.com/user/repo") */
+  repository?: string;
   plugins?: unknown[];
 }
 
@@ -22,6 +24,7 @@ const DEFAULT_CONFIG: Required<OxdocConfig> = {
   exclude: ["**/*.test.*", "**/*.spec.*", "**/node_modules/**", "**/dist/**", "**/__tests__/**"],
   coverage: { threshold: 0, exportedOnly: true },
   output: { format: "json", dir: "./docs-output" },
+  repository: "",
   plugins: [],
 };
 
@@ -104,6 +107,7 @@ export function mergeConfig(
       ...defaults.output,
       ...user.output,
     },
+    repository: user.repository ?? defaults.repository,
     plugins: user.plugins ?? defaults.plugins,
   };
 }

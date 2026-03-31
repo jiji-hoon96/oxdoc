@@ -19,6 +19,7 @@ interface GenerateOptions {
   format: string;
   include?: string[];
   exclude?: string[];
+  repository: string;
   plugins: OxdocPlugin[];
 }
 
@@ -79,7 +80,7 @@ async function runGenerate(opts: GenerateOptions): Promise<void> {
     writeFileSync(outPath, output, "utf-8");
     logger.success(`llms.txt documentation written to ${outPath}`);
   } else if (format === "html") {
-    const output = generateHTML(project);
+    const output = generateHTML(project, { repository: opts.repository || undefined });
     const outPath = join(opts.outputDir, "index.html");
     writeFileSync(outPath, output, "utf-8");
     logger.success(`HTML documentation written to ${outPath}`);
@@ -106,6 +107,7 @@ export const generateCommand = new Command("generate")
       format: (options.format ?? config.output.format).toLowerCase(),
       include: options.include ?? config.include,
       exclude: options.exclude ?? config.exclude,
+      repository: config.repository,
       plugins: (config.plugins ?? []) as OxdocPlugin[],
     };
 
