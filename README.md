@@ -5,9 +5,10 @@ Native-speed TypeScript/JavaScript API documentation generator powered by [OXC](
 ## Features
 
 - **OXC Parser** - Rust NAPI 바인딩 기반 초고속 파싱 (Babel 대비 10-50x)
-- **JSDoc/TSDoc 추출** - 소스 코드에서 API 문서 자동 생성 (JSON, Markdown)
+- **JSDoc/TSDoc 추출** - 소스 코드에서 API 문서 자동 생성 (JSON, Markdown, HTML, llms.txt)
 - **문서 커버리지** - export된 심볼의 문서화 비율 측정 (CI 연동)
 - **Doc Test** - `@example` 블록의 코드를 실제 실행하여 검증
+- **HTML 문서** - 사이드바, 검색, 다크 테마를 갖춘 단일 페이지 API 문서
 
 ## Quick Start
 
@@ -30,7 +31,7 @@ npx oxdoc doctest ./src
 ### `oxdoc generate`
 
 ```bash
-oxdoc generate [path] --format json|markdown --output <dir>
+oxdoc generate [path] --format json|markdown|html|llms-txt --output <dir>
 ```
 
 소스 파일에서 JSDoc/TSDoc을 추출하여 API 문서를 생성합니다.
@@ -94,6 +95,14 @@ TypeDoc은 tsc에 의존하여 대형 프로젝트에서 심각한 문제가 발
 - 검색 인덱스 초기화에 **35초+ 소요**
 
 oxdoc은 OXC 파서로 이 문제를 해결합니다.
+
+### Benchmarks (es-toolkit, 603 files)
+
+| | oxdoc | TypeDoc | |
+|---|---|---|---|
+| HTML 생성 | **0.27s** | 2.36s | 8.7x faster |
+| JSON 생성 | **0.25s** | 1.46s | 5.8x faster |
+| 메모리 | **117MB** | 445MB | 3.8x less |
 
 ## Documentation
 
