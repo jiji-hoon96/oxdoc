@@ -2,9 +2,9 @@
 sidebar_position: 3
 ---
 
-# CI/CD Integration
+# CI/CD 연동
 
-oxdoc can automatically verify documentation quality in CI environments.
+oxdoc은 CI 환경에서 문서 품질을 자동으로 검증할 수 있습니다.
 
 ## GitHub Actions
 
@@ -25,15 +25,15 @@ jobs:
 
       - run: pnpm install
 
-      # Maintain 80%+ documentation coverage
+      # 문서 커버리지 80% 이상 유지
       - name: Check doc coverage
         run: npx @jiji-hoon96/oxdoc coverage ./src --threshold 80
 
-      # Verify that @example blocks actually work
+      # @example 블록이 실제로 동작하는지 검증
       - name: Run doc tests
         run: npx @jiji-hoon96/oxdoc doctest ./src
 
-      # Generate API docs (optional)
+      # API 문서 생성 (선택)
       - name: Generate API docs
         run: npx @jiji-hoon96/oxdoc generate ./src --format markdown --output ./api-docs
 ```
@@ -51,6 +51,6 @@ jobs:
 ```
 
 ```bash
-# Use with lint-staged
+# lint-staged와 함께 사용
 npx @jiji-hoon96/oxdoc coverage ./src --threshold 80
 ```

@@ -2,41 +2,44 @@
 sidebar_position: 2
 ---
 
-# CLI 레퍼런스
+# CLI Reference
 
 ## oxdoc generate
 
-소스 파일에서 API 문서를 생성합니다.
+Generates API documentation from source files.
 
 ```bash
 oxdoc generate [path] [options]
 ```
 
-| 인자/옵션 | 설명 | 기본값 |
-|-----------|------|--------|
-| `[path]` | 소스 디렉토리 경로 | `./src` |
-| `-f, --format <format>` | 출력 형식 (`json`, `markdown`, `llms-txt`) | `json` |
-| `-o, --output <dir>` | 출력 디렉토리 | `./docs-output` |
-| `-w, --watch` | 파일 변경 감지 시 자동 재생성 | `false` |
-| `--include <patterns...>` | 포함할 glob 패턴 | `**/*.{ts,tsx,js,jsx}` |
-| `--exclude <patterns...>` | 제외할 glob 패턴 | `**/*.test.*`, `**/node_modules/**` |
+| Argument/Option | Description | Default |
+|-----------------|-------------|---------|
+| `[path]` | Source directory path | `./src` |
+| `-f, --format <format>` | Output format (`json`, `markdown`, `html`, `llms-txt`) | `json` |
+| `-o, --output <dir>` | Output directory | `./docs-output` |
+| `-w, --watch` | Auto-regenerate on file changes | `false` |
+| `--include <patterns...>` | Include glob patterns | `**/*.{ts,tsx,js,jsx}` |
+| `--exclude <patterns...>` | Exclude glob patterns | `**/*.test.*`, `**/node_modules/**` |
 
-### 예시
+### Examples
 
 ```bash
-# 기본 사용
+# Basic usage
 oxdoc generate ./src
 
-# Markdown으로 특정 디렉토리에 출력
+# Markdown output to a specific directory
 oxdoc generate ./lib --format markdown --output ./api-docs
 
-# 특정 파일만 포함
+# Standalone HTML documentation with sidebar, search, and dark theme
+oxdoc generate ./src --format html --output ./api-docs
+
+# Include specific files only
 oxdoc generate ./src --include "**/*.ts" --exclude "**/*.internal.*"
 
-# AI 친화적 llms.txt 형식으로 생성
+# AI-friendly llms.txt format
 oxdoc generate ./src --format llms-txt
 
-# Watch 모드 (파일 변경 시 자동 재생성)
+# Watch mode (auto-regenerate on file changes)
 oxdoc generate ./src --format markdown --watch
 ```
 
@@ -44,20 +47,20 @@ oxdoc generate ./src --format markdown --watch
 
 ## oxdoc coverage
 
-문서 커버리지를 측정합니다.
+Measures documentation coverage.
 
 ```bash
 oxdoc coverage [path] [options]
 ```
 
-| 인자/옵션 | 설명 | 기본값 |
-|-----------|------|--------|
-| `[path]` | 소스 디렉토리 경로 | `./src` |
-| `-t, --threshold <percent>` | 최소 커버리지 임계값 (%) | `0` |
-| `--all` | 비export 심볼도 포함 | `false` |
-| `--format <format>` | 출력 형식 (`text`, `json`) | `text` |
+| Argument/Option | Description | Default |
+|-----------------|-------------|---------|
+| `[path]` | Source directory path | `./src` |
+| `-t, --threshold <percent>` | Minimum coverage threshold (%) | `0` |
+| `--all` | Include non-exported symbols | `false` |
+| `--format <format>` | Output format (`text`, `json`) | `text` |
 
-### 출력 예시
+### Output Example
 
 ```
   Documentation Coverage Report
@@ -78,32 +81,33 @@ oxdoc coverage [path] [options]
   ✓ Coverage 83.3% meets threshold 80%
 ```
 
-### CI 연동
+### CI Integration
 
-임계값 미달 시 exit code 1을 반환하므로 CI에서 바로 사용 가능합니다:
+Returns exit code 1 when below threshold, making it directly usable in CI:
 
 ```yaml
 # GitHub Actions
 - name: Check documentation coverage
-  run: npx oxdoc coverage ./src --threshold 80
+  run: npx @jiji-hoon96/oxdoc coverage ./src --threshold 80
 ```
 
 ---
 
 ## oxdoc doctest
 
-`@example` 블록의 코드를 실행하여 검증합니다.
+Executes `@example` code blocks and validates them.
 
 ```bash
 oxdoc doctest [path] [options]
 ```
 
-| 인자/옵션 | 설명 | 기본값 |
-|-----------|------|--------|
-| `[path]` | 소스 디렉토리 경로 | `./src` |
-| `--bail` | 첫 번째 실패 시 중단 | `false` |
+| Argument/Option | Description | Default |
+|-----------------|-------------|---------|
+| `[path]` | Source directory path | `./src` |
+| `--bail` | Stop on first failure | `false` |
+| `--reporter <format>` | Output format (`text`, `json`) | `text` |
 
-### 출력 예시
+### Output Example
 
 ```
   ✓ add (math.ts:5) - 2 assertion(s) passed

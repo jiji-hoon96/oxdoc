@@ -31,8 +31,8 @@ const config: Config = {
   ],
 
   i18n: {
-    defaultLocale: 'ko',
-    locales: ['ko', 'en'],
+    defaultLocale: 'en',
+    locales: ['en', 'ko'],
   },
 
   presets: [
@@ -82,6 +82,10 @@ const config: Config = {
         },
         {to: '/blog', label: 'Blog', position: 'left'},
         {
+          type: 'localeDropdown',
+          position: 'right',
+        },
+        {
           href: 'https://github.com/jiji-hoon96/oxdoc',
           position: 'right',
           className: 'header-github-link',
@@ -97,12 +101,16 @@ const config: Config = {
           items: [
             {label: 'Getting Started', to: '/docs/guides/getting-started'},
             {label: 'CLI Reference', to: '/docs/guides/cli-reference'},
+            {label: 'Configuration', to: '/docs/guides/configuration'},
+            {label: 'Output Formats', to: '/docs/guides/output-formats'},
+            {label: 'Plugin API', to: '/docs/guides/plugin-api'},
             {label: 'CI Integration', to: '/docs/guides/ci-integration'},
           ],
         },
         {
           title: 'Resources',
           items: [
+            {label: 'Benchmarks', to: '/docs/guides/benchmarks'},
             {label: 'Blog', to: '/blog'},
             {label: 'Architecture Decisions', to: '/docs/adr/oxc-parser'},
           ],

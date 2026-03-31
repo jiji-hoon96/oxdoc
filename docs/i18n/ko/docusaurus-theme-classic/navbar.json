@@ -1,0 +1,14 @@
+{
+  "title": {
+    "message": "oxdoc",
+    "description": "The title in the navbar"
+  },
+  "item.label.Docs": {
+    "message": "문서",
+    "description": "Navbar item with label Docs"
+  },
+  "item.label.Blog": {
+    "message": "블로그",
+    "description": "Navbar item with label Blog"
+  }
+}

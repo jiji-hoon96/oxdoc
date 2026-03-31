@@ -2,82 +2,85 @@
 sidebar_position: 1
 ---
 
-# 시작하기
+# Getting Started
 
-## 설치
+## Installation
 
 ```bash
 # npm
-npm install -D oxdoc
+npm install -D @jiji-hoon96/oxdoc
 
 # pnpm
-pnpm add -D oxdoc
+pnpm add -D @jiji-hoon96/oxdoc
 
-# 또는 npx로 직접 실행
-npx oxdoc --help
+# Or run directly with npx
+npx @jiji-hoon96/oxdoc --help
 ```
 
-## 요구사항
+## Requirements
 
-- Node.js 20 이상
-- TypeScript/JavaScript 프로젝트
+- Node.js 20 or higher
+- TypeScript/JavaScript project
 
-## 기본 사용법
+## Basic Usage
 
-### 1. API 문서 생성
+### 1. Generate API Docs
 
-소스 코드에서 JSDoc/TSDoc 주석을 추출하여 문서를 생성합니다.
+Extract JSDoc/TSDoc comments from source code and generate documentation.
 
 ```bash
-# JSON 형식 (기본)
-npx oxdoc generate ./src
+# JSON format (default)
+npx @jiji-hoon96/oxdoc generate ./src
 
-# Markdown 형식
-npx oxdoc generate ./src --format markdown
+# Markdown format
+npx @jiji-hoon96/oxdoc generate ./src --format markdown
 
-# 출력 디렉토리 지정
-npx oxdoc generate ./src --format markdown --output ./api-docs
+# HTML format (standalone single-page with sidebar, search, dark theme)
+npx @jiji-hoon96/oxdoc generate ./src --format html
+
+# Specify output directory
+npx @jiji-hoon96/oxdoc generate ./src --format markdown --output ./api-docs
 ```
 
-### 2. 문서 커버리지 체크
+### 2. Check Documentation Coverage
 
-export된 심볼 중 JSDoc이 있는 비율을 측정합니다.
+Measures the ratio of exported symbols that have JSDoc documentation.
 
 ```bash
-# 커버리지 확인
-npx oxdoc coverage ./src
+# Check coverage
+npx @jiji-hoon96/oxdoc coverage ./src
 
-# 임계값 설정 (CI용 - 미달 시 exit code 1)
-npx oxdoc coverage ./src --threshold 80
+# Set threshold (CI — returns exit code 1 if below)
+npx @jiji-hoon96/oxdoc coverage ./src --threshold 80
 
-# JSON 형식으로 출력
-npx oxdoc coverage ./src --format json
+# JSON output
+npx @jiji-hoon96/oxdoc coverage ./src --format json
 
-# 비export 심볼도 포함
-npx oxdoc coverage ./src --all
+# Include non-exported symbols
+npx @jiji-hoon96/oxdoc coverage ./src --all
 ```
 
-### 3. Doc Test 실행
+### 3. Run Doc Tests
 
-`@example` 블록의 코드가 실제로 동작하는지 검증합니다.
+Validates that `@example` code blocks actually work.
 
 ```bash
-npx oxdoc doctest ./src
+npx @jiji-hoon96/oxdoc doctest ./src
 
-# 첫 실패 시 중단
-npx oxdoc doctest ./src --bail
+# Stop on first failure
+npx @jiji-hoon96/oxdoc doctest ./src --bail
 ```
 
-#### Doc Test 작성법
+#### Writing Doc Tests
 
-`// =>` 패턴으로 기대값을 명시하면 자동으로 assertion이 됩니다:
+Use `// =>` to specify expected values, which become automatic assertions:
 
 ```typescript
 /**
- * 두 숫자를 더합니다.
- * @param a - 첫 번째 숫자
- * @param b - 두 번째 숫자
- * @returns 합
+ * Adds two numbers.
+ * @param a - First number
+ * @param b - Second number
+ * @returns The sum
  * @example
  * ```ts
  * add(1, 2) // => 3
@@ -89,17 +92,17 @@ export function add(a: number, b: number): number {
 }
 ```
 
-## 지원하는 심볼 종류
+## Supported Symbol Types
 
-| 종류 | 예시 | 추출 |
-|------|------|------|
-| 함수 | `export function foo()` | O |
-| 클래스 | `export class Foo` | O (멤버 포함) |
-| 인터페이스 | `export interface IFoo` | O (프로퍼티 포함) |
-| 타입 별칭 | `export type Foo = ...` | O |
-| 열거형 | `export enum Foo` | O |
-| 변수 | `export const FOO = ...` | O |
+| Kind | Example | Extracted |
+|------|---------|-----------|
+| Function | `export function foo()` | Yes |
+| Class | `export class Foo` | Yes (including members) |
+| Interface | `export interface IFoo` | Yes (including properties) |
+| Type Alias | `export type Foo = ...` | Yes |
+| Enum | `export enum Foo` | Yes |
+| Variable | `export const FOO = ...` | Yes |
 
-## 지원하는 JSDoc 태그
+## Supported JSDoc Tags
 
-`@param`, `@returns`, `@example`, `@typeParam`, `@throws`, `@since`, `@deprecated`, `@see` 및 커스텀 태그
+`@param`, `@returns`, `@example`, `@typeParam`, `@throws`, `@since`, `@deprecated`, `@see`, and custom tags
