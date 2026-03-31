@@ -34,17 +34,26 @@
   },
   "keywords": [
     "typescript",
+    "javascript",
     "documentation",
+    "api-docs",
     "jsdoc",
     "tsdoc",
     "oxc",
-    "api-docs"
+    "doc-generator",
+    "coverage",
+    "doctest",
+    "llms-txt"
   ],
   "author": "jiji-hoon96",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/jiji-hoon96/oxdoc.git"
+  },
+  "homepage": "https://oxdoc.vercel.app",
+  "bugs": {
+    "url": "https://github.com/jiji-hoon96/oxdoc/issues"
   },
   "engines": {
     "node": ">=20"
