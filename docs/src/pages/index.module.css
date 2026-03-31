@@ -287,40 +287,98 @@
   text-align: center;
   color: var(--ifm-color-emphasis-600);
   font-size: 1.1rem;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
+}
+
+/* Tabs */
+.benchmarkTabs {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.benchmarkTab {
+  padding: 8px 20px;
+  border-radius: 999px;
+  border: 1px solid var(--oxdoc-card-border);
+  background: transparent;
+  color: var(--ifm-color-emphasis-600);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.benchmarkTab:hover {
+  border-color: var(--ifm-color-primary);
+  color: var(--ifm-color-primary);
+}
+
+.benchmarkTabActive {
+  background: var(--ifm-color-primary);
+  border-color: var(--ifm-color-primary);
+  color: #fff;
+}
+
+.benchmarkTabActive:hover {
+  color: #fff;
 }
 
 .benchmarkTable {
-  max-width: 700px;
+  max-width: 800px;
   margin: 0 auto;
   padding: 0 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
 .benchmarkRow {
-  display: flex;
-  align-items: center;
-  padding: 1rem 1.5rem;
-  border-radius: 8px;
-  margin-bottom: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: 12px;
   background: var(--oxdoc-card-bg);
   border: 1px solid var(--oxdoc-card-border);
 }
 
 .benchmarkLabel {
-  flex: 1;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.95rem;
+  margin-bottom: 0.75rem;
+}
+
+.benchmarkBars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.benchmarkBarGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.benchmarkBarName {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--ifm-color-emphasis-500);
+  width: 60px;
+  flex-shrink: 0;
+  text-align: right;
 }
 
 .benchmarkBar {
-  flex: 2;
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  flex: 1;
+  height: 32px;
+  background: var(--ifm-background-color);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
 }
 
 .benchmarkBarFill {
-  height: 28px;
+  height: 100%;
   border-radius: 6px;
   display: flex;
   align-items: center;
@@ -330,7 +388,17 @@
   font-weight: 600;
   color: #fff;
   min-width: 60px;
-  transition: width 0.6s ease;
+  width: var(--bar-width);
+}
+
+/* Animation */
+@keyframes barGrow {
+  from { width: 0; }
+  to { width: var(--bar-width); }
+}
+
+.benchmarkAnimate {
+  animation: barGrow 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
 .benchmarkBarOxdoc {
@@ -339,4 +407,70 @@
 
 .benchmarkBarTypedoc {
   background: linear-gradient(90deg, #94a3b8, #cbd5e1);
+}
+
+.benchmarkMultiplier {
+  display: inline-flex;
+  align-self: flex-start;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.1);
+  padding: 4px 12px;
+  border-radius: 999px;
+  margin-top: 0.25rem;
+  white-space: nowrap;
+}
+
+.benchmarkFootnote {
+  text-align: center;
+  color: var(--ifm-color-emphasis-500);
+  font-size: 0.85rem;
+  margin-top: 2rem;
+  font-style: italic;
+}
+
+/* === CTA Section === */
+.cta {
+  padding: 5rem 0;
+  text-align: center;
+}
+
+.ctaTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-bottom: 1.5rem;
+}
+
+.ctaCode {
+  margin-bottom: 2rem;
+}
+
+.ctaCode code {
+  font-size: 1rem;
+  padding: 12px 24px;
+  border-radius: 8px;
+  background: var(--oxdoc-card-bg);
+  border: 1px solid var(--oxdoc-card-border);
+  color: var(--ifm-color-primary);
+  font-weight: 500;
+}
+
+/* === Responsive === */
+@media (max-width: 640px) {
+  .benchmarkTabs {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .benchmarkBarGroup {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .benchmarkBarName {
+    text-align: left;
+    width: auto;
+  }
 }

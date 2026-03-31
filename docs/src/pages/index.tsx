@@ -1,4 +1,4 @@
-import type {ReactNode} from 'react';
+import {type ReactNode, useEffect, useRef, useState} from 'react';
 import Link from '@docusaurus/Link';
 import Layout from '@theme/Layout';
 import styles from './index.module.css';
@@ -14,12 +14,12 @@ function HeroSection() {
           API docs at<br />native speed
         </h1>
         <p className={styles.heroSubtitle}>
-          OXC 파서 기반 초고속 TypeScript/JavaScript API 문서 생성기.
-          JSDoc 추출, 커버리지 체크, Doc Test를 하나의 도구로.
+          Blazing-fast TypeScript/JavaScript API doc generator powered by OXC parser.
+          JSDoc extraction, coverage checks, and doc testing in one tool.
         </p>
         <div className={styles.heroButtons}>
           <Link className={styles.heroButtonPrimary} to="/docs/intro">
-            시작하기
+            Get Started
           </Link>
           <Link
             className={styles.heroButtonSecondary}
@@ -37,7 +37,7 @@ function HeroSection() {
           <div className={styles.terminalBody}>
             <div>
               <span className={styles.terminalPrompt}>$ </span>
-              <span className={styles.terminalCommand}>npx oxdoc coverage ./src --threshold 80</span>
+              <span className={styles.terminalCommand}>npx @jiji-hoon96/oxdoc coverage ./src --threshold 80</span>
             </div>
             <br />
             <div className={styles.terminalOutput}>
@@ -67,33 +67,33 @@ function HeroSection() {
 const FEATURES: Array<{icon: string; title: string; description: string}> = [
   {
     icon: '⚡',
-    title: 'OXC 네이티브 파싱',
-    description: 'Rust NAPI 바인딩 기반 OXC 파서로 10-50x 빠른 파싱. 5,000파일을 1초 이내에 처리합니다.',
+    title: 'OXC Native Parsing',
+    description: '10-50x faster parsing via Rust NAPI bindings. Processes 5,000 files in under 1 second.',
   },
   {
     icon: '📊',
-    title: '문서 커버리지',
-    description: 'export된 심볼의 JSDoc 문서화 비율을 측정. CI에서 threshold 미달 시 빌드 실패로 품질을 보장합니다.',
+    title: 'Doc Coverage',
+    description: 'Measures JSDoc coverage of exported symbols. Fail CI builds when coverage drops below threshold.',
   },
   {
     icon: '🧪',
     title: 'Doc Test',
-    description: '@example 블록의 코드를 실제로 실행하여 문서와 코드의 동기화를 자동 검증합니다.',
+    description: 'Executes @example code blocks to automatically verify that documentation stays in sync with code.',
   },
   {
     icon: '🤖',
-    title: 'llms.txt 출력',
-    description: 'AI/LLM 최적화 문서 형식을 자동 생성. Copilot, Claude 등이 라이브러리를 정확하게 이해합니다.',
+    title: 'llms.txt Output',
+    description: 'Auto-generates AI/LLM-optimized docs. Helps Copilot, Claude, and others understand your library accurately.',
   },
   {
     icon: '🔌',
-    title: '플러그인 시스템',
-    description: 'Transform, Output, Analyzer 3가지 훅으로 확장 가능. 커스텀 출력 포맷과 분석 규칙을 추가하세요.',
+    title: 'Plugin System',
+    description: 'Extensible with 3 hooks: Transform, Output, and Analyzer. Add custom output formats and analysis rules.',
   },
   {
     icon: '👁',
-    title: 'Watch 모드',
-    description: '파일 변경을 감지하여 문서를 자동 재생성. 개발 중 실시간으로 문서를 확인할 수 있습니다.',
+    title: 'Watch Mode',
+    description: 'Detects file changes and auto-regenerates docs. Preview documentation in real-time during development.',
   },
 ];
 
@@ -101,9 +101,9 @@ function FeaturesSection() {
   return (
     <section className={styles.features}>
       <div className="container">
-        <h2 className={styles.featuresTitle}>모든 것을 하나의 도구로</h2>
+        <h2 className={styles.featuresTitle}>Everything in one tool</h2>
         <p className={styles.featuresSubtitle}>
-          문서 생성, 커버리지 체크, 테스트를 빠르고 간편하게
+          Generate docs, check coverage, and test examples — fast
         </p>
         <div className={styles.featureGrid}>
           {FEATURES.map((feature, idx) => (
@@ -119,49 +119,169 @@ function FeaturesSection() {
   );
 }
 
-function BenchmarkSection() {
+interface BenchmarkItem {
+  label: string;
+  oxdoc: string;
+  typedoc: string;
+  oxdocWidth: string;
+  typedocWidth: string;
+  multiplier: string;
+}
+
+const REAL_WORLD_BENCHMARKS: BenchmarkItem[] = [
+  {
+    label: 'HTML Generation',
+    oxdoc: '0.27s',
+    typedoc: '2.36s',
+    oxdocWidth: '11%',
+    typedocWidth: '100%',
+    multiplier: '8.7x faster',
+  },
+  {
+    label: 'JSON Generation',
+    oxdoc: '0.25s',
+    typedoc: '1.46s',
+    oxdocWidth: '17%',
+    typedocWidth: '100%',
+    multiplier: '5.8x faster',
+  },
+  {
+    label: 'Memory Usage',
+    oxdoc: '117MB',
+    typedoc: '445MB',
+    oxdocWidth: '26%',
+    typedocWidth: '100%',
+    multiplier: '3.8x less',
+  },
+];
+
+const SCALE_BENCHMARKS: BenchmarkItem[] = [
+  {
+    label: 'Parse Time',
+    oxdoc: '0.9s',
+    typedoc: '~60s+',
+    oxdocWidth: '2%',
+    typedocWidth: '100%',
+    multiplier: '66x faster',
+  },
+  {
+    label: 'Memory Usage',
+    oxdoc: '22MB',
+    typedoc: '~2GB+',
+    oxdocWidth: '1%',
+    typedocWidth: '100%',
+    multiplier: '90x less',
+  },
+];
+
+function BenchmarkBar({item, animate}: {item: BenchmarkItem; animate: boolean}) {
   return (
-    <section className={styles.benchmark}>
-      <div className="container">
-        <h2 className={styles.benchmarkTitle}>벤치마크</h2>
-        <p className={styles.benchmarkSubtitle}>
-          5,000 파일 / 15,000 심볼 기준
-        </p>
-        <div className={styles.benchmarkTable}>
-          <div className={styles.benchmarkRow}>
-            <div className={styles.benchmarkLabel}>oxdoc</div>
-            <div className={styles.benchmarkBar}>
-              <div
-                className={`${styles.benchmarkBarFill} ${styles.benchmarkBarOxdoc}`}
-                style={{width: '8%'}}>
-                0.9s
-              </div>
-            </div>
-          </div>
-          <div className={styles.benchmarkRow}>
-            <div className={styles.benchmarkLabel}>TypeDoc</div>
-            <div className={styles.benchmarkBar}>
-              <div
-                className={`${styles.benchmarkBarFill} ${styles.benchmarkBarTypedoc}`}
-                style={{width: '90%'}}>
-                ~60s+
-              </div>
-            </div>
-          </div>
-          <div className={styles.benchmarkRow}>
-            <div className={styles.benchmarkLabel}>Memory</div>
-            <div className={styles.benchmarkBar}>
-              <div
-                className={`${styles.benchmarkBarFill} ${styles.benchmarkBarOxdoc}`}
-                style={{width: '10%'}}>
-                22MB
-              </div>
-              <span style={{color: 'var(--ifm-color-emphasis-500)', fontSize: '0.85rem'}}>
-                vs TypeDoc ~2GB+
-              </span>
+    <div className={styles.benchmarkRow}>
+      <div className={styles.benchmarkLabel}>{item.label}</div>
+      <div className={styles.benchmarkBars}>
+        <div className={styles.benchmarkBarGroup}>
+          <span className={styles.benchmarkBarName}>oxdoc</span>
+          <div className={styles.benchmarkBar}>
+            <div
+              className={`${styles.benchmarkBarFill} ${styles.benchmarkBarOxdoc} ${animate ? styles.benchmarkAnimate : ''}`}
+              style={{'--bar-width': item.oxdocWidth} as React.CSSProperties}>
+              {item.oxdoc}
             </div>
           </div>
         </div>
+        <div className={styles.benchmarkBarGroup}>
+          <span className={styles.benchmarkBarName}>TypeDoc</span>
+          <div className={styles.benchmarkBar}>
+            <div
+              className={`${styles.benchmarkBarFill} ${styles.benchmarkBarTypedoc} ${animate ? styles.benchmarkAnimate : ''}`}
+              style={{'--bar-width': item.typedocWidth} as React.CSSProperties}>
+              {item.typedoc}
+            </div>
+          </div>
+        </div>
+        <div className={styles.benchmarkMultiplier}>{item.multiplier}</div>
+      </div>
+    </div>
+  );
+}
+
+function BenchmarkSection() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const [animate, setAnimate] = useState(false);
+  const [activeTab, setActiveTab] = useState<'real' | 'scale'>('real');
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setAnimate(true);
+        }
+      },
+      {threshold: 0.2},
+    );
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+    return () => observer.disconnect();
+  }, []);
+
+  // Reset animation on tab change
+  useEffect(() => {
+    setAnimate(false);
+    const timer = setTimeout(() => setAnimate(true), 50);
+    return () => clearTimeout(timer);
+  }, [activeTab]);
+
+  const benchmarks = activeTab === 'real' ? REAL_WORLD_BENCHMARKS : SCALE_BENCHMARKS;
+
+  return (
+    <section className={styles.benchmark} ref={sectionRef}>
+      <div className="container">
+        <h2 className={styles.benchmarkTitle}>Benchmarks</h2>
+        <p className={styles.benchmarkSubtitle}>
+          Real performance comparisons against TypeDoc
+        </p>
+
+        <div className={styles.benchmarkTabs}>
+          <button
+            className={`${styles.benchmarkTab} ${activeTab === 'real' ? styles.benchmarkTabActive : ''}`}
+            onClick={() => setActiveTab('real')}>
+            es-toolkit (603 files)
+          </button>
+          <button
+            className={`${styles.benchmarkTab} ${activeTab === 'scale' ? styles.benchmarkTabActive : ''}`}
+            onClick={() => setActiveTab('scale')}>
+            Large Scale (5,000 files)
+          </button>
+        </div>
+
+        <div className={styles.benchmarkTable}>
+          {benchmarks.map((item, idx) => (
+            <BenchmarkBar key={`${activeTab}-${idx}`} item={item} animate={animate} />
+          ))}
+        </div>
+
+        <p className={styles.benchmarkFootnote}>
+          {activeTab === 'real'
+            ? 'Measured on es-toolkit (603 source files). Run your own benchmarks with: pnpm bench'
+            : 'Measured with 5,000 generated files / 15,000 symbols'}
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function CTASection() {
+  return (
+    <section className={styles.cta}>
+      <div className="container">
+        <h2 className={styles.ctaTitle}>Ready to generate docs at native speed?</h2>
+        <div className={styles.ctaCode}>
+          <code>npx @jiji-hoon96/oxdoc generate ./src --format html</code>
+        </div>
+        <Link className={styles.heroButtonPrimary} to="/docs/guides/getting-started">
+          Read the docs
+        </Link>
       </div>
     </section>
   );
@@ -171,10 +291,11 @@ export default function Home(): ReactNode {
   return (
     <Layout
       title="Native-speed API Documentation"
-      description="OXC 파서 기반 초고속 TypeScript/JavaScript API 문서 생성기">
+      description="Blazing-fast TypeScript/JavaScript API documentation generator powered by OXC parser">
       <HeroSection />
       <FeaturesSection />
       <BenchmarkSection />
+      <CTASection />
     </Layout>
   );
 }
