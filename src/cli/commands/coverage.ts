@@ -1,7 +1,10 @@
 import { Command } from "commander";
 import { resolve } from "node:path";
+import { writeFileSync, mkdirSync } from "node:fs";
+import { dirname } from "node:path";
 import { parseProject } from "../../lib/parser/index.js";
 import { calculateCoverage } from "../../lib/analyzer/coverage.js";
+import { generateCoverageBadge } from "../../lib/analyzer/badge.js";
 import { loadConfig } from "../../lib/config/index.js";
 import { logger } from "../../lib/utils/logger.js";
 import { reportParseErrors } from "../../lib/utils/report-errors.js";
@@ -13,6 +16,7 @@ export const coverageCommand = new Command("coverage")
   .option("-t, --threshold <percent>", "Minimum coverage threshold (%)")
   .option("--all", "Include non-exported symbols", false)
   .option("--format <format>", "Output format (text, json)", "text")
+  .option("--badge <path>", "Generate SVG coverage badge at the given path")
   .action(async (sourcePath: string | undefined, options) => {
     const config = await loadConfig();
     const sourceRoot = resolve(sourcePath ?? config.sourceRoot);
@@ -28,12 +32,20 @@ export const coverageCommand = new Command("coverage")
       threshold,
     });
 
+    // Badge generation
+    if (options.badge) {
+      const badgePath = resolve(options.badge);
+      mkdirSync(dirname(badgePath), { recursive: true });
+      writeFileSync(badgePath, generateCoverageBadge(report.coveragePercent), "utf-8");
+      logger.success(`Coverage badge written to ${badgePath}`);
+    }
+
     if (options.format === "json") {
       console.log(JSON.stringify(report, null, 2));
       return;
     }
 
-    // Text 출력
+    // Text output
     console.log("");
     console.log(chalk.bold("  Documentation Coverage Report"));
     console.log(chalk.gray("  " + "─".repeat(35)));
@@ -48,7 +60,7 @@ export const coverageCommand = new Command("coverage")
     );
     console.log("");
 
-    // 종류별 통계
+    // By kind stats
     if (Object.keys(report.byKind).length > 0) {
       console.log(chalk.bold("  By kind:"));
       for (const [kind, stats] of Object.entries(report.byKind)) {
@@ -63,7 +75,7 @@ export const coverageCommand = new Command("coverage")
       console.log("");
     }
 
-    // 미문서화 심볼 목록
+    // Undocumented symbols list
     if (report.undocumentedSymbols.length > 0) {
       console.log(chalk.bold("  Undocumented symbols:"));
       for (const sym of report.undocumentedSymbols) {
@@ -74,8 +86,8 @@ export const coverageCommand = new Command("coverage")
       console.log("");
     }
 
-    // 임계값 체크
-    if (threshold > 0) {
+    // Threshold check
+    if (threshold !== undefined && threshold > 0) {
       if (report.coveragePercent >= threshold) {
         logger.success(
           `Coverage ${report.coveragePercent}% meets threshold ${threshold}%`,
