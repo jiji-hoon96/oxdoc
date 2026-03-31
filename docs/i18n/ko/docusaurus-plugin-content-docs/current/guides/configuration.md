@@ -41,6 +41,9 @@ interface OxdocConfig {
     dir?: string;
   };
 
+  /** HTML 출력에서 소스 링크를 위한 저장소 URL (예: "https://github.com/user/repo") */
+  repository?: string;
+
   /** 플러그인 목록 (기본: []) */
   plugins?: unknown[];
 }
@@ -62,7 +65,8 @@ interface OxdocConfig {
   "output": {
     "format": "html",
     "dir": "./api-docs"
-  }
+  },
+  "repository": "https://github.com/your-org/your-repo"
 }
 ```
 
@@ -105,4 +109,5 @@ export default {
 | `coverage.exportedOnly` | `true` |
 | `output.format` | `"json"` |
 | `output.dir` | `"./docs-output"` |
+| `repository` | `""` (비활성) |
 | `plugins` | `[]` |

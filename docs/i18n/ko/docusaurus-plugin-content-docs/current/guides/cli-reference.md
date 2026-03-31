@@ -59,6 +59,7 @@ oxdoc coverage [path] [options]
 | `-t, --threshold <percent>` | 최소 커버리지 임계값 (%) | `0` |
 | `--all` | 비export 심볼도 포함 | `false` |
 | `--format <format>` | 출력 형식 (`text`, `json`) | `text` |
+| `--badge <path>` | 지정된 경로에 SVG 커버리지 뱃지 생성 | - |
 
 ### 출력 예시
 
@@ -116,4 +117,57 @@ oxdoc doctest [path] [options]
     Expected 6, got undefined
 
   Results: 2 passed, 1 failed, 3 total
+```
+
+---
+
+## oxdoc diff
+
+이전 JSON 스냅샷과 현재 소스 사이의 API 변경을 감지합니다.
+
+```bash
+oxdoc diff <snapshot> [path] [options]
+```
+
+| 인자/옵션 | 설명 | 기본값 |
+|-----------|------|--------|
+| `<snapshot>` | 이전 `api.json` 스냅샷 경로 | (필수) |
+| `[path]` | 소스 디렉토리 경로 | `./src` |
+| `--fail-on-breaking` | breaking change 발견 시 exit code 1 반환 | `false` |
+| `--format <format>` | 출력 형식 (`text`, `json`) | `text` |
+
+### 사용법
+
+```bash
+# 1. 기준 스냅샷 생성
+oxdoc generate ./src --format json --output ./baseline
+
+# 2. 코드 변경...
+
+# 3. API 변경 감지
+oxdoc diff ./baseline/api.json ./src
+
+# 4. CI에서 breaking change 차단
+oxdoc diff ./baseline/api.json ./src --fail-on-breaking
+```
+
+### 출력 예시
+
+```
+  API Diff Report
+  ───────────────────────────────────
+  Added:     2
+  Removed:   1
+  Changed:   1
+
+  ⚠ 2 breaking change(s) detected
+
+  − [BREAKING] Exported function "oldHelper" was removed
+    src/utils.ts (function)
+  ~ [BREAKING] Signature changed: "function parse(input: string)" → "function parse(input: string, options: Options)"
+    src/parser.ts (function)
+  + [safe] Exported function "newHelper" was added
+    src/utils.ts (function)
+  + [safe] Exported interface "Options" was added
+    src/parser.ts (interface)
 ```

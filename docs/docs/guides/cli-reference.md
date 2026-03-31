@@ -59,6 +59,7 @@ oxdoc coverage [path] [options]
 | `-t, --threshold <percent>` | Minimum coverage threshold (%) | `0` |
 | `--all` | Include non-exported symbols | `false` |
 | `--format <format>` | Output format (`text`, `json`) | `text` |
+| `--badge <path>` | Generate SVG coverage badge at the given path | - |
 
 ### Output Example
 
@@ -116,4 +117,57 @@ oxdoc doctest [path] [options]
     Expected 6, got undefined
 
   Results: 2 passed, 1 failed, 3 total
+```
+
+---
+
+## oxdoc diff
+
+Detects API changes between a previous JSON snapshot and the current source.
+
+```bash
+oxdoc diff <snapshot> [path] [options]
+```
+
+| Argument/Option | Description | Default |
+|-----------------|-------------|---------|
+| `<snapshot>` | Path to previous `api.json` snapshot | (required) |
+| `[path]` | Source directory path | `./src` |
+| `--fail-on-breaking` | Exit with code 1 if breaking changes found | `false` |
+| `--format <format>` | Output format (`text`, `json`) | `text` |
+
+### Usage
+
+```bash
+# 1. Generate a baseline snapshot
+oxdoc generate ./src --format json --output ./baseline
+
+# 2. Make changes to your code...
+
+# 3. Detect API changes
+oxdoc diff ./baseline/api.json ./src
+
+# 4. Use in CI to block breaking changes
+oxdoc diff ./baseline/api.json ./src --fail-on-breaking
+```
+
+### Output Example
+
+```
+  API Diff Report
+  ───────────────────────────────────
+  Added:     2
+  Removed:   1
+  Changed:   1
+
+  ⚠ 2 breaking change(s) detected
+
+  − [BREAKING] Exported function "oldHelper" was removed
+    src/utils.ts (function)
+  ~ [BREAKING] Signature changed: "function parse(input: string)" → "function parse(input: string, options: Options)"
+    src/parser.ts (function)
+  + [safe] Exported function "newHelper" was added
+    src/utils.ts (function)
+  + [safe] Exported interface "Options" was added
+    src/parser.ts (interface)
 ```

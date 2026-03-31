@@ -41,6 +41,9 @@ interface OxdocConfig {
     dir?: string;
   };
 
+  /** Repository URL for source links in HTML output (e.g. "https://github.com/user/repo") */
+  repository?: string;
+
   /** Plugin list (default: []) */
   plugins?: unknown[];
 }
@@ -62,7 +65,8 @@ interface OxdocConfig {
   "output": {
     "format": "html",
     "dir": "./api-docs"
-  }
+  },
+  "repository": "https://github.com/your-org/your-repo"
 }
 ```
 
@@ -105,4 +109,5 @@ export default {
 | `coverage.exportedOnly` | `true` |
 | `output.format` | `"json"` |
 | `output.dir` | `"./docs-output"` |
+| `repository` | `""` (disabled) |
 | `plugins` | `[]` |

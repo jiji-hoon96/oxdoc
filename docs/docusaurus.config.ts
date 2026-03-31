@@ -111,6 +111,7 @@ const config: Config = {
           title: 'Resources',
           items: [
             {label: 'Benchmarks', to: '/docs/guides/benchmarks'},
+            {label: 'Comparison', to: '/docs/guides/comparison'},
             {label: 'Blog', to: '/blog'},
             {label: 'Architecture Decisions', to: '/docs/adr/oxc-parser'},
           ],
