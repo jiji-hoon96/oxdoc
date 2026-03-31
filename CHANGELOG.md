@@ -8,7 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Documentation pages: Configuration, Plugin API, Output Formats, Benchmarks guides
+- Coverage badge generation: `oxdoc coverage --badge coverage.svg` generates SVG badge
+- HTML source links: `repository` config option adds "View Source" links to GitHub in HTML output
+- API change detection: `oxdoc diff <snapshot> [path]` compares API surface against a previous JSON snapshot
+- `--fail-on-breaking` flag for CI to block breaking API changes
+- Documentation pages: Configuration, Plugin API, Output Formats, Benchmarks, Comparison guides
 - Homepage benchmark visualization with CSS animations and tab-based scenario switching
 - CTA section on homepage
 - Korean i18n support via Docusaurus locale dropdown
