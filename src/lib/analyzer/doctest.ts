@@ -228,8 +228,11 @@ function generateTestCode(test: DocTest, importPath: string, entryImportPath: st
 
   if (test.assertions.length === 0) {
     // assertion 없음 — 코드 실행만 확인
-    // const → var 변환으로 재선언 허용 (var는 같은 스코프에서 재선언 가능)
     const safeCode = lines.map(constToVar).join("\n");
+    // top-level await가 있으면 async IIFE로 감싸기
+    if (code.includes("await ")) {
+      return `${importLine}\n(async () => {\n${safeCode}\n})();`;
+    }
     return `${importLine}\n${safeCode}`;
   }
 
@@ -409,13 +412,10 @@ function generateTestCodeWithEntry(test: DocTest, entryImportPath: string): stri
     importLine = `import * as __pkg from "${entryImportPath}";\nObject.assign(globalThis, __pkg);`;
   }
 
-  if (test.assertions.length === 0) {
-    const safeCode = lines.map(constToVar).join("\n");
-    return `${importLine}\n${safeCode}`;
-  }
-
-  // assertion이 있는 경우: 원본 코드를 entry import + 전역 바인딩으로 실행
   const safeCode = lines.map(constToVar).join("\n");
+  if (code.includes("await ")) {
+    return `${importLine}\n(async () => {\n${safeCode}\n})();`;
+  }
   return `${importLine}\n${safeCode}`;
 }
 
