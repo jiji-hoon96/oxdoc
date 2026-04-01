@@ -211,8 +211,9 @@ function generateTestCode(test: DocTest, importPath: string): string {
   }
 
   if (test.assertions.length === 0) {
-    // assertion 없음 — 코드 실행만 확인. const 중복 방지를 위해 let으로 변환
-    const safeCode = lines.map(constToLet).join("\n");
+    // assertion 없음 — 코드 실행만 확인
+    // const → var 변환으로 재선언 허용 (var는 같은 스코프에서 재선언 가능)
+    const safeCode = lines.map(constToVar).join("\n");
     return `${importLine}\n${safeCode}`;
   }
 
@@ -315,8 +316,35 @@ function generateTestCode(test: DocTest, importPath: string): string {
   return parts.join("\n");
 }
 
+/**
+ * 코드를 빈 줄 기준으로 블록으로 분리한다.
+ * 각 블록은 독립 스코프에서 실행되어 const/let 재선언을 방지한다.
+ */
+function splitIntoBlocks(lines: string[]): string[][] {
+  const blocks: string[][] = [];
+  let current: string[] = [];
+
+  for (const line of lines) {
+    if (line.trim() === "" && current.length > 0) {
+      blocks.push(current);
+      current = [];
+    } else if (line.trim() !== "") {
+      current.push(line);
+    }
+  }
+  if (current.length > 0) {
+    blocks.push(current);
+  }
+
+  return blocks.length > 0 ? blocks : [lines];
+}
+
 function constToLet(line: string): string {
   return line.replace(/^(\s*)const\s+/, "$1let ");
+}
+
+function constToVar(line: string): string {
+  return line.replace(/^(\s*)(?:const|let)\s+/, "$1var ");
 }
 
 // ─── 실행 ───
