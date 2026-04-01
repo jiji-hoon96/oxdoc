@@ -15,7 +15,11 @@ export const doctestCommand = new Command("doctest")
     const config = await loadConfig();
     const sourceRoot = resolve(sourcePath ?? config.sourceRoot);
 
-    logger.info(`Extracting doc tests from ${sourceRoot}...`);
+    const isJson = options.reporter === "json";
+
+    if (!isJson) {
+      logger.info(`Extracting doc tests from ${sourceRoot}...`);
+    }
 
     const project = await parseProject(sourceRoot, {
       include: config.include,
@@ -24,32 +28,44 @@ export const doctestCommand = new Command("doctest")
     const tests = extractDocTests(project);
 
     if (tests.length === 0) {
-      logger.warn("No @example blocks with code found.");
+      if (isJson) {
+        console.log(JSON.stringify({ passed: 0, failed: 0, skipped: 0, total: 0, results: [] }, null, 2));
+      } else {
+        logger.warn("No @example blocks with code found.");
+      }
       return;
     }
 
-    logger.info(`Found ${tests.length} doc test(s). Running...`);
-    console.log("");
+    if (!isJson) {
+      logger.info(`Found ${tests.length} doc test(s). Running...`);
+      console.log("");
+    }
 
     const results = runDocTests(tests, sourceRoot);
 
     let passed = 0;
     let failed = 0;
+    let skipped = 0;
 
     for (const result of results) {
-      if (result.passed) passed++;
+      if (result.skipped) skipped++;
+      else if (result.passed) passed++;
       else failed++;
     }
 
-    if (options.reporter === "json") {
-      console.log(JSON.stringify({ passed, failed, total: results.length, results }, null, 2));
+    if (isJson) {
+      console.log(JSON.stringify({ passed, failed, skipped, total: results.length, results }, null, 2));
       if (failed > 0) process.exit(1);
       return;
     }
 
     // Text reporter
     for (const result of results) {
-      if (result.passed) {
+      if (result.skipped) {
+        console.log(
+          `  ${chalk.yellow("○")} ${result.symbolName} (${result.filePath}:${result.line}) — skipped`,
+        );
+      } else if (result.passed) {
         console.log(
           `  ${chalk.green("✓")} ${result.symbolName} (${result.filePath}:${result.line}) - ${result.assertionCount} assertion(s) passed`,
         );
@@ -70,7 +86,7 @@ export const doctestCommand = new Command("doctest")
 
     console.log("");
     console.log(
-      `  Results: ${chalk.green(`${passed} passed`)}, ${failed > 0 ? chalk.red(`${failed} failed`) : `${failed} failed`}, ${results.length} total`,
+      `  Results: ${chalk.green(`${passed} passed`)}, ${failed > 0 ? chalk.red(`${failed} failed`) : `${failed} failed`}, ${skipped > 0 ? chalk.yellow(`${skipped} skipped`) : `${skipped} skipped`}, ${results.length} total`,
     );
 
     if (failed > 0) {
