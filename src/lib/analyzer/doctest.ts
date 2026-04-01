@@ -129,6 +129,19 @@ export interface DocTestResult {
 }
 
 /**
+ * sourceRoot 내에서 barrel export 파일 (index.ts, mod.ts 등)을 탐색한다.
+ */
+const ENTRY_CANDIDATES = ["index.ts", "index.tsx", "index.js", "mod.ts", "mod.js"];
+
+function findEntryPoint(sourceRoot: string): string | null {
+  for (const candidate of ENTRY_CANDIDATES) {
+    const fullPath = join(sourceRoot, candidate);
+    if (existsSync(fullPath)) return fullPath;
+  }
+  return null;
+}
+
+/**
  * 추출된 DocTest를 실행한다.
  */
 export function runDocTests(
@@ -138,11 +151,12 @@ export function runDocTests(
   const results: DocTestResult[] = [];
   const projectRoot = findProjectRoot(sourceRoot);
   const tmpDir = join(projectRoot, ".oxdoc-doctest-tmp");
+  const entryPoint = findEntryPoint(sourceRoot);
   mkdirSync(tmpDir, { recursive: true });
 
   try {
     for (let i = 0; i < tests.length; i++) {
-      const result = runSingleDocTest(tests[i], sourceRoot, projectRoot, tmpDir, i);
+      const result = runSingleDocTest(tests[i], sourceRoot, projectRoot, tmpDir, i, entryPoint);
       results.push(result);
     }
   } finally {
@@ -198,14 +212,16 @@ function shouldSkipExample(code: string, error?: string): boolean {
  * 4. 네임스페이스 import 감지 (_.foo → import * as _)
  * 5. 다음-줄 assertion 패턴 지원 (코드줄 + // => 줄)
  */
-function generateTestCode(test: DocTest, importPath: string): string {
+function generateTestCode(test: DocTest, importPath: string, entryImportPath: string | null): string {
   const code = test.code;
   const lines = code.split("\n");
   const nsAlias = detectNamespaceAlias(code);
 
+  // 기본: 파일 단위 import (빠르고 안전)
+  // entry point import는 fallback으로 runSingleDocTest에서 처리
   let importLine: string;
   if (nsAlias) {
-    importLine = `import * as ${nsAlias} from "${importPath}";`;
+    importLine = `import * as ${nsAlias} from "${entryImportPath || importPath}";`;
   } else {
     importLine = `import { ${test.symbolName} } from "${importPath}";`;
   }
@@ -347,6 +363,62 @@ function constToVar(line: string): string {
   return line.replace(/^(\s*)(?:const|let)\s+/, "$1var ");
 }
 
+// ─── 실행 헬퍼 ───
+
+function makeResult(test: DocTest, passed: boolean): DocTestResult {
+  return {
+    symbolName: test.symbolName,
+    filePath: test.filePath,
+    line: test.line,
+    passed,
+    skipped: false,
+    assertionCount: Math.max(test.assertions.length, 1),
+  };
+}
+
+function executeTestFile(tsxPath: string, testFile: string, cwd: string): { passed: boolean; error?: string } {
+  try {
+    execSync(`node --import ${tsxPath} ${testFile}`, {
+      timeout: 10000,
+      stdio: "pipe",
+      cwd,
+    });
+    return { passed: true };
+  } catch (err) {
+    const error = err as { stderr?: Buffer; message?: string };
+    const stderr = error.stderr?.toString() || error.message || "Unknown error";
+    const errorLine =
+      stderr.split("\n").find((l: string) => l.includes("Error:")) || stderr.split("\n")[0];
+    return { passed: false, error: errorLine.trim() };
+  }
+}
+
+/**
+ * entry point (barrel export) 를 통한 import 코드 생성.
+ * 패키지 전체 export에 접근할 수 있어 같은 패키지의 다른 함수 참조가 가능.
+ */
+function generateTestCodeWithEntry(test: DocTest, entryImportPath: string): string {
+  const code = test.code;
+  const lines = code.split("\n");
+  const nsAlias = detectNamespaceAlias(code);
+
+  let importLine: string;
+  if (nsAlias) {
+    importLine = `import * as ${nsAlias} from "${entryImportPath}";`;
+  } else {
+    importLine = `import * as __pkg from "${entryImportPath}";\nObject.assign(globalThis, __pkg);`;
+  }
+
+  if (test.assertions.length === 0) {
+    const safeCode = lines.map(constToVar).join("\n");
+    return `${importLine}\n${safeCode}`;
+  }
+
+  // assertion이 있는 경우: 원본 코드를 entry import + 전역 바인딩으로 실행
+  const safeCode = lines.map(constToVar).join("\n");
+  return `${importLine}\n${safeCode}`;
+}
+
 // ─── 실행 ───
 
 function runSingleDocTest(
@@ -355,6 +427,7 @@ function runSingleDocTest(
   projectRoot: string,
   tmpDir: string,
   index: number,
+  entryPoint: string | null,
 ): DocTestResult {
   if (shouldSkipExample(test.code)) {
     return {
@@ -386,52 +459,39 @@ function runSingleDocTest(
   const relativeFromTmp = relative(tmpDir, absoluteFilePath);
   const importPath = relativeFromTmp.replace(/\.(ts|tsx|js|jsx)$/, "");
 
-  const testCode = generateTestCode(test, importPath);
+  // entry point 경로를 tmpDir 기준 상대 경로로 변환
+  let entryImportPath: string | null = null;
+  if (entryPoint) {
+    entryImportPath = relative(tmpDir, entryPoint).replace(/\.(ts|tsx|js|jsx)$/, "");
+  }
+
+  const tsxPath = resolveTsxPath();
+
+  // 1차: 파일 단위 import로 시도
+  const testCode = generateTestCode(test, importPath, null);
   writeFileSync(testFile, testCode, "utf-8");
 
-  try {
-    const tsxPath = resolveTsxPath();
-    execSync(`node --import ${tsxPath} ${testFile}`, {
-      timeout: 10000,
-      stdio: "pipe",
-      cwd: projectRoot,
-    });
+  const execResult = executeTestFile(tsxPath, testFile, projectRoot);
 
-    return {
-      symbolName: test.symbolName,
-      filePath: test.filePath,
-      line: test.line,
-      passed: true,
-      skipped: false,
-      assertionCount: Math.max(test.assertions.length, 1),
-    };
-  } catch (err) {
-    const error = err as { stderr?: Buffer; message?: string };
-    const stderr = error.stderr?.toString() || error.message || "Unknown error";
-    const errorLine =
-      stderr.split("\n").find((l: string) => l.includes("Error:")) || stderr.split("\n")[0];
-    const errorMsg = errorLine.trim();
-
-    if (shouldSkipExample(test.code, errorMsg)) {
-      return {
-        symbolName: test.symbolName,
-        filePath: test.filePath,
-        line: test.line,
-        passed: false,
-        skipped: true,
-        assertionCount: 0,
-        error: `Skipped: ${errorMsg}`,
-      };
-    }
-
-    return {
-      symbolName: test.symbolName,
-      filePath: test.filePath,
-      line: test.line,
-      passed: false,
-      skipped: false,
-      assertionCount: Math.max(test.assertions.length, 1),
-      error: errorMsg,
-    };
+  if (execResult.passed) {
+    return { ...makeResult(test, true), assertionCount: Math.max(test.assertions.length, 1) };
   }
+
+  // 2차: ReferenceError이고 entry point가 있으면 barrel import로 재시도
+  if (entryImportPath && execResult.error && execResult.error.includes("is not defined")) {
+    const retryCode = generateTestCodeWithEntry(test, entryImportPath);
+    writeFileSync(testFile, retryCode, "utf-8");
+
+    const retryResult = executeTestFile(tsxPath, testFile, projectRoot);
+    if (retryResult.passed) {
+      return { ...makeResult(test, true), assertionCount: Math.max(test.assertions.length, 1) };
+    }
+    // retry도 실패하면 원래 에러 사용
+  }
+
+  if (shouldSkipExample(test.code, execResult.error)) {
+    return { ...makeResult(test, false), skipped: true, error: `Skipped: ${execResult.error}` };
+  }
+
+  return { ...makeResult(test, false), error: execResult.error };
 }
