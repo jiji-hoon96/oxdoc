@@ -34,6 +34,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - `OxdocConfig.output.format` type now includes `"html"` (was missing)
 - CLI reference now lists `html` as a valid format for `oxdoc generate`
+- Doctest: fix namespace alias detection — only detect `_.method()` (lodash convention), no longer matches JS built-in globals
+- Doctest: fix code fence parsing for malformed/unclosed fences
+- Doctest: preserve variable declarations in assertion expressions (`const x = expr // => value`)
+- Doctest: support multi-line expected values (`// => [\n//   ...\n// ]`)
+- Doctest: strip trailing parenthetical comments from expected values (`true (comment)` → `true`)
+- Doctest: improved error message extraction for empty/truncated stderr output
+- Doctest: use Node.js `util.isDeepStrictEqual` for assertion comparison (handles Date, RegExp, Map, Set, etc.)
+- Doctest: auto-skip browser-only API examples (document, window, etc.)
+- Doctest: auto-skip error-throwing examples ("should throw", "will throw")
+- Doctest: barrel import fallback now supports assertion-aware code generation
+- Doctest: filter out text-description assertions (non-JS expected values)
+- Doctest: remove unused `splitIntoBlocks` dead code
+- Doctest: remove overly aggressive pseudo-code detection — only skip obvious fake names (my*, mock*, stub*)
 
 ### Previously Added
 - HTML output format: `oxdoc generate --format html` — single-page API docs with sidebar navigation, search, dark theme
