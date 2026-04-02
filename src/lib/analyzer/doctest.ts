@@ -753,3 +753,19 @@ function runSingleDocTest(
 
   return { ...makeResult(test, false), error: execResult.error };
 }
+
+// 테스트 전용 export — 내부 함수의 unit test를 위해 노출
+export const _testing = {
+  extractCodeBlock,
+  cleanCodeBlock,
+  cleanExpectedValue,
+  isValidExpectedValue,
+  parseAssertions,
+  detectNamespaceAlias,
+  shouldSkipExample,
+  isPseudoCodeError,
+  isNondeterministicExample,
+  generateTestCode,
+  isUnclosedBracket,
+  collectMultiLineExpected,
+};

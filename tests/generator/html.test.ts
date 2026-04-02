@@ -140,6 +140,75 @@ describe("generateHTML", () => {
     expect(html).toContain("Use subtract instead");
   });
 
+  it("since 태그를 렌더링한다", () => {
+    const project = createProject();
+    project.files[0].symbols[0].doc!.tags.push({
+      tag: "since",
+      name: "",
+      type: "",
+      description: "1.0.0",
+      optional: false,
+    });
+    const html = generateHTML(project);
+
+    expect(html).toContain("Since");
+    expect(html).toContain("1.0.0");
+  });
+
+  it("children 멤버를 렌더링한다", () => {
+    const project = createProject();
+    project.files[0].symbols[0].children = [
+      {
+        name: "helper",
+        kind: "method",
+        doc: { description: "헬퍼 함수", tags: [], range: { start: 0, end: 10 } },
+        signature: "helper(): void",
+        exported: false,
+        location: { file: "math.ts", line: 10, column: 1 },
+      },
+    ];
+    const html = generateHTML(project);
+
+    expect(html).toContain("Members");
+    expect(html).toContain("helper(): void");
+    expect(html).toContain("헬퍼 함수");
+  });
+
+  it("fileDoc description을 렌더링한다", () => {
+    const project = createProject();
+    project.files[0].fileDoc = {
+      description: "수학 유틸리티 모듈",
+      tags: [],
+      range: { start: 0, end: 10 },
+    };
+    const html = generateHTML(project);
+
+    expect(html).toContain("수학 유틸리티 모듈");
+  });
+
+  it("internal(비export) 심볼을 렌더링한다", () => {
+    const project = createProject();
+    project.files[0].symbols.push({
+      name: "internalHelper",
+      kind: "function",
+      doc: { description: "내부 함수", tags: [], range: { start: 0, end: 10 } },
+      signature: "function internalHelper()",
+      exported: false,
+      location: { file: "math.ts", line: 20, column: 1 },
+    });
+    const html = generateHTML(project);
+
+    expect(html).toContain("Internal");
+    expect(html).toContain("internalHelper");
+  });
+
+  it("repository URL로 소스 링크를 생성한다", () => {
+    const project = createProject();
+    const html = generateHTML(project, { repository: "https://github.com/user/repo" });
+
+    expect(html).toContain("https://github.com/user/repo/blob/main/math.ts#L5");
+  });
+
   it("메타데이터를 포함한다", () => {
     const html = generateHTML(createProject());
 

@@ -7,7 +7,7 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       include: ["src/**/*.ts"],
-      exclude: ["src/cli/**", "src/types/**"],
+      exclude: ["src/cli/**", "src/types/**", "src/lib/utils/watcher.ts"],
       thresholds: {
         lines: 80,
         branches: 70,

@@ -104,4 +104,84 @@ describe("generateMarkdown", () => {
     expect(md).toContain("계산기");
     expect(md).toContain("더하기 메서드");
   });
+
+  it("fileDoc description을 렌더링한다", () => {
+    const project: ProjectDocumentation = {
+      files: [{
+        filePath: "utils.ts",
+        fileDoc: { description: "유틸리티 모듈", tags: [], range: { start: 0, end: 10 } },
+        symbols: [{
+          name: "helper", kind: "function", doc: null,
+          signature: "function helper()", exported: true,
+          location: { file: "utils.ts", line: 1, column: 1 },
+        }],
+      }],
+      metadata: { generatedAt: "", version: "0.1.0", sourceRoot: "/src", errors: [] },
+    };
+    const md = generateMarkdown(project);
+    expect(md).toContain("유틸리티 모듈");
+  });
+
+  it("internal(비export) 심볼 섹션을 렌더링한다", () => {
+    const project: ProjectDocumentation = {
+      files: [{
+        filePath: "lib.ts",
+        fileDoc: null,
+        symbols: [
+          { name: "publicFn", kind: "function", doc: null, signature: "function publicFn()", exported: true, location: { file: "lib.ts", line: 1, column: 1 } },
+          { name: "privateFn", kind: "function", doc: null, signature: "function privateFn()", exported: false, location: { file: "lib.ts", line: 5, column: 1 } },
+        ],
+      }],
+      metadata: { generatedAt: "", version: "0.1.0", sourceRoot: "/src", errors: [] },
+    };
+    const md = generateMarkdown(project);
+    expect(md).toContain("### Internal");
+    expect(md).toContain("privateFn");
+  });
+
+  it("@example을 코드 블록으로 렌더링한다", () => {
+    const project: ProjectDocumentation = {
+      files: [{
+        filePath: "math.ts",
+        fileDoc: null,
+        symbols: [{
+          name: "add", kind: "function",
+          doc: {
+            description: "더하기", tags: [
+              { tag: "example", name: "", type: "", description: "add(1, 2)", optional: false },
+            ], range: { start: 0, end: 10 },
+          },
+          signature: "function add()", exported: true,
+          location: { file: "math.ts", line: 1, column: 1 },
+        }],
+      }],
+      metadata: { generatedAt: "", version: "0.1.0", sourceRoot: "/src", errors: [] },
+    };
+    const md = generateMarkdown(project);
+    expect(md).toContain("**Example:**");
+    expect(md).toContain("```ts");
+    expect(md).toContain("add(1, 2)");
+  });
+
+  it("이미 코드 펜스로 감싸진 example은 그대로 유지한다", () => {
+    const project: ProjectDocumentation = {
+      files: [{
+        filePath: "math.ts",
+        fileDoc: null,
+        symbols: [{
+          name: "add", kind: "function",
+          doc: {
+            description: "더하기", tags: [
+              { tag: "example", name: "", type: "", description: "```ts\nadd(1, 2)\n```", optional: false },
+            ], range: { start: 0, end: 10 },
+          },
+          signature: "function add()", exported: true,
+          location: { file: "math.ts", line: 1, column: 1 },
+        }],
+      }],
+      metadata: { generatedAt: "", version: "0.1.0", sourceRoot: "/src", errors: [] },
+    };
+    const md = generateMarkdown(project);
+    expect(md).toContain("```ts\nadd(1, 2)\n```");
+  });
 });
