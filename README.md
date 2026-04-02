@@ -8,15 +8,31 @@
 
 Native-speed TypeScript/JavaScript API documentation generator powered by [OXC](https://oxc.rs/).
 
+## Why oxdoc?
+
+TypeDoc relies on the TypeScript compiler (tsc), which causes serious problems in large projects:
+
+- **12GB+ memory** in 110K LOC monorepos → OOM crashes
+- **Minutes of build time** just for API docs
+- **Coupled to tsc API** → breaks when TypeScript 7 (Go port) ships
+
+oxdoc replaces tsc with the OXC parser (Rust NAPI), solving all three problems while adding features TypeDoc lacks: doc testing, API change detection, and coverage checking.
+
+### Design Trade-off
+
+oxdoc extracts type signatures **as written in source code**. It does not expand type aliases or resolve generics like TypeDoc does. This is intentional — it's what makes oxdoc 10-60x faster with 4-90x less memory. For most projects, the source signature is the most accurate and readable form of documentation.
+
 ## Features
 
-- **OXC Parser** - Blazing-fast parsing via Rust NAPI bindings (10-50x faster than Babel)
-- **JSDoc/TSDoc Extraction** - Auto-generate API docs from source code (JSON, Markdown, HTML, llms.txt)
-- **Documentation Coverage** - Measure doc coverage of exported symbols (CI integration)
-- **Doc Test** - Execute and validate `@example` code blocks
-- **HTML Docs** - Standalone single-page API docs with sidebar, search, and dark theme
-- **Plugin System** - Extensible via Transform, Output, and Analyzer hooks
-- **Watch Mode** - Auto-regenerate docs on file changes
+- **OXC Parser** — Rust NAPI bindings, 10-60x faster than tsc-based tools
+- **4 Output Formats** — JSON, Markdown, HTML (with search & dark theme), llms.txt
+- **Doc Coverage** — Measure and enforce documentation coverage in CI
+- **Doc Test** — Execute `@example` blocks and validate `// =>` assertions
+- **API Diff** — Detect breaking API changes between releases
+- **10 Symbol Kinds** — function, class, interface, type, enum, enum-member, getter, setter, namespace, variable
+- **Overload Support** — Function overloads merged with `overloads` array
+- **Plugin System** — Extensible via Transform, Output, and Analyzer hooks
+- **Watch Mode** — Auto-regenerate docs on file changes
 
 ## Quick Start
 
@@ -25,13 +41,16 @@ Native-speed TypeScript/JavaScript API documentation generator powered by [OXC](
 pnpm add -D @jiji-hoon96/oxdoc
 
 # Generate API docs
-npx @jiji-hoon96/oxdoc generate ./src --format markdown --output ./api-docs
+npx oxdoc generate ./src --format html --output ./api-docs
 
 # Check documentation coverage (CI fails if below 80%)
-npx @jiji-hoon96/oxdoc coverage ./src --threshold 80
+npx oxdoc coverage ./src --threshold 80
 
 # Test @example blocks
-npx @jiji-hoon96/oxdoc doctest ./src
+npx oxdoc doctest ./src
+
+# Detect breaking API changes
+npx oxdoc diff ./api-snapshot.json ./src --fail-on-breaking
 ```
 
 ## CLI Commands
@@ -46,7 +65,7 @@ Extracts JSDoc/TSDoc from source files and generates API documentation.
 
 | Option | Description | Default |
 |--------|-------------|---------|
-| `-f, --format` | Output format (`json`, `markdown`, `html`, `llms-txt`) | `json` |
+| `-f, --format` | Output format | `json` |
 | `-o, --output` | Output directory | `./docs-output` |
 | `-w, --watch` | Auto-regenerate on file changes | `false` |
 | `--include` | Include glob patterns | `**/*.{ts,tsx,js,jsx}` |
@@ -55,23 +74,10 @@ Extracts JSDoc/TSDoc from source files and generates API documentation.
 ### `oxdoc coverage`
 
 ```bash
-oxdoc coverage [path] --threshold 80 --format text|json
+oxdoc coverage [path] --threshold 80 --format text|json --badge badge.svg
 ```
 
-Measures documentation coverage. Returns exit code 1 when below threshold for CI usage.
-
-```
-  Documentation Coverage Report
-  ───────────────────────────────────
-  Total symbols:      42
-  Documented:         35  (83.3%)
-  Undocumented:        7
-
-  By kind:
-    function       12/15  (80.0%)
-    class           5/5   (100.0%)
-    interface       8/10  (80.0%)
-```
+Measures documentation coverage. Returns exit code 1 when below threshold.
 
 ### `oxdoc doctest`
 
@@ -79,13 +85,14 @@ Measures documentation coverage. Returns exit code 1 when below threshold for CI
 oxdoc doctest [path] --bail --reporter text|json
 ```
 
-Executes `@example` code blocks and validates `// =>` assertions.
+Executes `@example` code blocks and validates assertions:
 
 ```typescript
 /**
  * @example
  * ```ts
  * add(1, 2) // => 3
+ * add(-1, 1) // => 0
  * ```
  */
 export function add(a: number, b: number): number {
@@ -93,9 +100,17 @@ export function add(a: number, b: number): number {
 }
 ```
 
+### `oxdoc diff`
+
+```bash
+oxdoc diff <snapshot.json> [path] --fail-on-breaking --format text|json
+```
+
+Compares current API surface against a previous JSON snapshot. Detects added, removed, and changed symbols. Use `--fail-on-breaking` in CI to block breaking changes.
+
 ## Benchmarks
 
-### es-toolkit (603 files)
+### es-toolkit (603 files, 1322 symbols)
 
 | | oxdoc | TypeDoc | Improvement |
 |---|---|---|---|
@@ -123,34 +138,32 @@ Create `oxdoc.config.json` in your project root:
   "output": {
     "format": "html",
     "dir": "./api-docs"
-  }
+  },
+  "repository": "https://github.com/user/repo"
 }
 ```
-
-See the [Configuration Guide](https://oxdoc.vercel.app/docs/guides/configuration) for all options.
 
 ## Architecture
 
 ```
-oxc-parser (Rust NAPI)  ← Native-speed parsing
-       ↓
-oxdoc (TypeScript)      ← JSDoc matching, analysis, output generation
+Source Files  →  OXC Parser (Rust NAPI)  →  Symbol Extraction  →  Output Generation
+                                                    ↓
+                                         Coverage / DocTest / Diff
 ```
 
-Parsing (the heaviest operation) is handled by OXC's Rust binary, while the analysis/output layer is flexibly extensible in TypeScript.
+The heaviest operation (parsing) runs in native Rust. Analysis and output generation are in TypeScript for extensibility.
 
-## Why oxdoc?
+## Extracted Symbol Information
 
-TypeDoc relies on tsc, causing serious issues in large projects:
-- Requires **12GB of memory** in a 110K LOC monorepo
-- **OOM crashes** in large projects
-- Search index initialization takes **35+ seconds**
-
-oxdoc solves this with the OXC parser.
-
-## Documentation
-
-Visit the [documentation site](https://oxdoc.vercel.app) for detailed guides.
+| Symbol Kind | Extracted Data |
+|-------------|----------------|
+| function | signature, JSDoc, overloads, parameters, return type |
+| class | signature, JSDoc, methods, properties, getters/setters, static members |
+| interface | signature, JSDoc, properties |
+| type | signature, JSDoc |
+| enum | signature, JSDoc, members with values |
+| namespace | signature, JSDoc, exported children |
+| variable | signature, JSDoc |
 
 ## License
 
