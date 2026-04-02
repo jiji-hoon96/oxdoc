@@ -93,7 +93,7 @@ async function runGenerate(opts: GenerateOptions): Promise<void> {
 export const generateCommand = new Command("generate")
   .description("Generate API documentation from source files")
   .argument("[path]", "Source directory path")
-  .option("-f, --format <format>", "Output format (json, markdown, llms-txt)")
+  .option("-f, --format <format>", "Output format (json, markdown, html, llms-txt)")
   .option("-o, --output <dir>", "Output directory")
   .option("-w, --watch", "Watch for file changes and regenerate", false)
   .option("--include <patterns...>", "Include glob patterns")

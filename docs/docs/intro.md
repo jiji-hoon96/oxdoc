@@ -14,7 +14,7 @@ TypeDoc relies on the TypeScript Compiler (tsc), which causes serious performanc
 - **OOM (Out of Memory)** crashes in large projects
 - Search index initialization takes **35+ seconds**
 
-oxdoc uses OXC parser with Rust NAPI bindings to deliver **10-100x faster parsing speed**.
+oxdoc uses OXC parser with Rust NAPI bindings to deliver **7-10x faster documentation generation** compared to TypeDoc (measured on real projects).
 
 ## Key Features
 

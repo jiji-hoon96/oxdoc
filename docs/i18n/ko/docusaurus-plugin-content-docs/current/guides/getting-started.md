@@ -94,14 +94,17 @@ export function add(a: number, b: number): number {
 
 ## 지원하는 심볼 종류
 
-| 종류 | 예시 | 추출 |
-|------|------|------|
-| 함수 | `export function foo()` | O |
-| 클래스 | `export class Foo` | O (멤버 포함) |
-| 인터페이스 | `export interface IFoo` | O (프로퍼티 포함) |
-| 타입 별칭 | `export type Foo = ...` | O |
-| 열거형 | `export enum Foo` | O |
-| 변수 | `export const FOO = ...` | O |
+| 종류 | 예시 | 추출 데이터 |
+|------|------|------------|
+| 함수 | `export function foo()` | 시그니처, JSDoc, 오버로드 |
+| 클래스 | `export class Foo` | 메서드, 프로퍼티, getter/setter, static 멤버 |
+| 인터페이스 | `export interface IFoo` | 프로퍼티 (JSDoc 포함) |
+| 타입 별칭 | `export type Foo = ...` | 시그니처, JSDoc |
+| 열거형 | `export enum Foo { A, B }` | 멤버 (값, JSDoc 포함) |
+| 변수 | `export const FOO = ...` | 시그니처, JSDoc |
+| 네임스페이스 | `export namespace Utils` | export된 자식 심볼 |
+| Re-export | `export { X } from './y'` | 출처 모듈 추적 |
+| Default Export | `export default function` | `isDefault` 플래그 |
 
 ## 지원하는 JSDoc 태그
 

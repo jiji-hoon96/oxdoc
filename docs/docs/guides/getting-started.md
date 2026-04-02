@@ -94,14 +94,17 @@ export function add(a: number, b: number): number {
 
 ## Supported Symbol Types
 
-| Kind | Example | Extracted |
-|------|---------|-----------|
-| Function | `export function foo()` | Yes |
-| Class | `export class Foo` | Yes (including members) |
-| Interface | `export interface IFoo` | Yes (including properties) |
-| Type Alias | `export type Foo = ...` | Yes |
-| Enum | `export enum Foo` | Yes |
-| Variable | `export const FOO = ...` | Yes |
+| Kind | Example | Extracted Data |
+|------|---------|----------------|
+| Function | `export function foo()` | signature, JSDoc, overloads |
+| Class | `export class Foo` | methods, properties, getters/setters, static members |
+| Interface | `export interface IFoo` | properties with JSDoc |
+| Type Alias | `export type Foo = ...` | signature, JSDoc |
+| Enum | `export enum Foo { A, B }` | members with values and JSDoc |
+| Variable | `export const FOO = ...` | signature, JSDoc |
+| Namespace | `export namespace Utils` | exported children |
+| Re-export | `export { X } from './y'` | source module tracking |
+| Default Export | `export default function` | flagged with `isDefault` |
 
 ## Supported JSDoc Tags
 
