@@ -68,7 +68,7 @@ const FEATURES: Array<{icon: string; title: string; description: string}> = [
   {
     icon: '⚡',
     title: 'OXC Native Parsing',
-    description: '10-50x faster parsing via Rust NAPI bindings. Processes 5,000 files in under 1 second.',
+    description: '7-10x faster than TypeDoc (measured). Processes 5,000 files in under 1 second via Rust NAPI.',
   },
   {
     icon: '📊',
@@ -130,47 +130,47 @@ interface BenchmarkItem {
 
 const REAL_WORLD_BENCHMARKS: BenchmarkItem[] = [
   {
-    label: 'HTML Generation',
-    oxdoc: '0.27s',
-    typedoc: '2.36s',
-    oxdocWidth: '11%',
-    typedocWidth: '100%',
-    multiplier: '8.7x faster',
-  },
-  {
     label: 'JSON Generation',
-    oxdoc: '0.25s',
-    typedoc: '1.46s',
-    oxdocWidth: '17%',
+    oxdoc: '0.24s',
+    typedoc: '1.70s',
+    oxdocWidth: '14%',
     typedocWidth: '100%',
-    multiplier: '5.8x faster',
+    multiplier: '7x faster',
   },
   {
-    label: 'Memory Usage',
-    oxdoc: '117MB',
-    typedoc: '445MB',
-    oxdocWidth: '26%',
+    label: 'HTML Generation',
+    oxdoc: '0.25s',
+    typedoc: '2.53s',
+    oxdocWidth: '10%',
     typedocWidth: '100%',
-    multiplier: '3.8x less',
+    multiplier: '10x faster',
+  },
+  {
+    label: 'Peak Memory',
+    oxdoc: '131MB',
+    typedoc: '470MB',
+    oxdocWidth: '28%',
+    typedocWidth: '100%',
+    multiplier: '3.6x less',
   },
 ];
 
 const SCALE_BENCHMARKS: BenchmarkItem[] = [
   {
-    label: 'Parse Time',
-    oxdoc: '0.9s',
-    typedoc: '~60s+',
-    oxdocWidth: '2%',
+    label: 'Parse Time (5K files)',
+    oxdoc: '0.81s',
+    typedoc: '(N/A)',
+    oxdocWidth: '5%',
     typedocWidth: '100%',
-    multiplier: '66x faster',
+    multiplier: '~6,200 files/s',
   },
   {
-    label: 'Memory Usage',
-    oxdoc: '22MB',
-    typedoc: '~2GB+',
-    oxdocWidth: '1%',
+    label: 'Memory (5K files)',
+    oxdoc: '33MB',
+    typedoc: '(N/A)',
+    oxdocWidth: '3%',
     typedocWidth: '100%',
-    multiplier: '90x less',
+    multiplier: 'Linear scaling',
   },
 ];
 

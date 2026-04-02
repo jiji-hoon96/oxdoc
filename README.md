@@ -20,11 +20,11 @@ oxdoc replaces tsc with the OXC parser (Rust NAPI), solving all three problems w
 
 ### Design Trade-off
 
-oxdoc extracts type signatures **as written in source code**. It does not expand type aliases or resolve generics like TypeDoc does. This is intentional — it's what makes oxdoc 10-60x faster with 4-90x less memory. For most projects, the source signature is the most accurate and readable form of documentation.
+oxdoc extracts type signatures **as written in source code**. It does not expand type aliases or resolve generics like TypeDoc does. This is intentional — it's what makes oxdoc 7-10x faster with 3-4x less memory. For most projects, the source signature is the most accurate and readable form of documentation.
 
 ## Features
 
-- **OXC Parser** — Rust NAPI bindings, 10-60x faster than tsc-based tools
+- **OXC Parser** — Rust NAPI bindings, 7-10x faster than TypeDoc (measured)
 - **4 Output Formats** — JSON, Markdown, HTML (with search & dark theme), llms.txt
 - **Doc Coverage** — Measure and enforce documentation coverage in CI
 - **Doc Test** — Execute `@example` blocks and validate `// =>` assertions
@@ -110,20 +110,32 @@ Compares current API surface against a previous JSON snapshot. Detects added, re
 
 ## Benchmarks
 
+Measured on macOS (Apple Silicon), Node.js v22, median of 3 runs. Both tools run with `--skipErrorChecking` for TypeDoc.
+
 ### es-toolkit (603 files, 1322 symbols)
 
-| | oxdoc | TypeDoc | Improvement |
+| | oxdoc | TypeDoc 0.28 | Speedup |
 |---|---|---|---|
-| HTML Generation | **0.27s** | 2.36s | 8.7x faster |
-| JSON Generation | **0.25s** | 1.46s | 5.8x faster |
-| Memory Usage | **117MB** | 445MB | 3.8x less |
+| JSON Generation | **0.24s** | 1.70s | 7x faster |
+| HTML Generation | **0.25s** | 2.53s | 10x faster |
+| Peak Memory | **131MB** | 470MB | 3.6x less |
 
-### Large Scale (5,000 files / 15,000 symbols)
+### radashi (162 files, 437 symbols)
 
-| | oxdoc | TypeDoc | Improvement |
+| | oxdoc | TypeDoc 0.28 | Speedup |
 |---|---|---|---|
-| Total Time | **0.9s** | ~60s+ | ~66x faster |
-| Memory Usage | **22MB** | ~2GB+ | ~90x less |
+| JSON Generation | **0.13s** | 1.12s | 8.6x faster |
+| Peak Memory | **84MB** | 272MB | 3.2x less |
+
+### Synthetic (generated fixtures)
+
+| Files | Symbols | Time | Memory | Throughput |
+|------:|--------:|-----:|-------:|-----------:|
+| 100 | 300 | 0.03s | 6MB | ~3,300/s |
+| 1,000 | 3,000 | 0.18s | 6MB | ~5,700/s |
+| 5,000 | 15,000 | 0.81s | 33MB | ~6,200/s |
+
+> TypeDoc requires the full TypeScript compiler, so its baseline overhead (~1s) dominates on small projects. The gap widens with project size.
 
 ## Configuration
 

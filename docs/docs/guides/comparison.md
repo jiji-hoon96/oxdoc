@@ -34,16 +34,18 @@ TypeDoc relies on the full TypeScript Compiler (tsc), which means it loads the e
 
 oxdoc uses OXC parser (Rust NAPI) for syntax-only parsing — no type checking, native Rust execution, and batch processing for memory efficiency.
 
-| Metric (es-toolkit, 603 files) | oxdoc | TypeDoc | Improvement |
-|--------------------------------|-------|---------|-------------|
-| HTML Generation | **0.27s** | 2.36s | 8.7x faster |
-| JSON Generation | **0.25s** | 1.46s | 5.8x faster |
-| Memory Usage | **117MB** | 445MB | 3.8x less |
+Measured on macOS (Apple Silicon), Node.js v22, median of 3 runs. TypeDoc 0.28 with `--skipErrorChecking`.
 
-| Metric (5,000 files) | oxdoc | TypeDoc |
-|-----------------------|-------|---------|
-| Total Time | **0.9s** | ~60s+ |
-| Memory Usage | **22MB** | ~2GB+ |
+| Metric (es-toolkit, 603 files) | oxdoc | TypeDoc 0.28 | Speedup |
+|--------------------------------|-------|-------------|---------|
+| JSON Generation | **0.24s** | 1.70s | 7x faster |
+| HTML Generation | **0.25s** | 2.53s | 10x faster |
+| Peak Memory | **131MB** | 470MB | 3.6x less |
+
+| Metric (radashi, 162 files) | oxdoc | TypeDoc 0.28 | Speedup |
+|-----------------------------|-------|-------------|---------|
+| JSON Generation | **0.13s** | 1.12s | 8.6x faster |
+| Peak Memory | **84MB** | 272MB | 3.2x less |
 
 ### vs JSDoc
 

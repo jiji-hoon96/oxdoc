@@ -4,60 +4,62 @@ sidebar_position: 7
 
 # 벤치마크
 
-oxdoc은 파싱을 OXC의 Rust NAPI 바인딩으로 위임하여 TypeDoc 대비 상당한 성능 향상을 달성합니다.
+모든 수치는 macOS (Apple Silicon), Node.js v22.17.0 환경에서 3회 측정 중앙값입니다. TypeDoc 0.28.18에 `--skipErrorChecking` 플래그를 적용했습니다.
 
-## 실제 프로젝트: es-toolkit (603 파일)
+## 실제 프로젝트: es-toolkit (603 파일, 1322 심볼)
 
-[es-toolkit](https://github.com/toss/es-toolkit) 라이브러리(603개 소스 파일)를 대상으로 측정했습니다.
+[es-toolkit](https://github.com/toss/es-toolkit)을 대상으로 측정했습니다.
 
-| 측정 항목 | oxdoc | TypeDoc | 개선 |
-|----------|-------|---------|------|
-| HTML 생성 | **0.27s** | 2.36s | 8.7x 빠름 |
-| JSON 생성 | **0.25s** | 1.46s | 5.8x 빠름 |
-| 메모리 사용량 | **117MB** | 445MB | 3.8x 적음 |
+| 측정 항목 | oxdoc | TypeDoc 0.28 | 배율 |
+|----------|-------|-------------|------|
+| JSON 생성 | **0.24s** | 1.70s | 7x 빠름 |
+| HTML 생성 | **0.25s** | 2.53s | 10x 빠름 |
+| 피크 메모리 | **131MB** | 470MB | 3.6x 적음 |
 
-## 대규모 테스트 (5,000 파일 / 15,000 심볼)
+## 실제 프로젝트: radashi (162 파일, 437 심볼)
 
-5,000개 파일과 15,000개 심볼을 포함한 생성된 픽스처로 스트레스 테스트했습니다.
+[radashi](https://github.com/radashi-org/radashi)를 대상으로 측정했습니다.
 
-| 측정 항목 | oxdoc | TypeDoc | 개선 |
-|----------|-------|---------|------|
-| 총 소요 시간 | **0.9s** | ~60s+ | ~66x 빠름 |
-| 메모리 사용량 | **22MB** | ~2GB+ | ~90x 적음 |
+| 측정 항목 | oxdoc | TypeDoc 0.28 | 배율 |
+|----------|-------|-------------|------|
+| JSON 생성 | **0.13s** | 1.12s | 8.6x 빠름 |
+| 피크 메모리 | **84MB** | 272MB | 3.2x 적음 |
+
+## 합성 스케일 테스트
+
+파일 수를 늘려가며 측정한 합성 벤치마크입니다. 각 파일에 문서화된 심볼 3개를 포함합니다.
+
+| 파일 수 | 심볼 수 | 시간 | 메모리 | 처리량 |
+|--------:|--------:|-----:|-------:|-------:|
+| 100 | 300 | 0.03s | 6MB | ~3,300/s |
+| 500 | 1,500 | 0.10s | 10MB | ~5,100/s |
+| 1,000 | 3,000 | 0.18s | 6MB | ~5,700/s |
+| 5,000 | 15,000 | 0.81s | 33MB | ~6,200/s |
 
 ## 성능 차이의 이유
 
-TypeDoc은 파싱에 전체 TypeScript Compiler(tsc)를 사용합니다:
-- 전체 타입 시스템을 로드
-- 모든 타입 참조를 해석
-- 완전한 프로그램 그래프를 구축
+**TypeDoc**은 파싱에 전체 TypeScript Compiler(tsc)를 사용합니다. `--skipErrorChecking`을 사용해도 전체 컴파일러 파이프라인을 초기화해야 하므로 ~1초의 고정 오버헤드가 있습니다.
 
-oxdoc은 OXC 파서(Rust NAPI)를 사용합니다:
-- 구문만 파싱 — 타입 체킹 없음
-- JavaScript가 아닌 네이티브 Rust로 실행
-- 메모리 효율을 위한 배치 처리 (50 파일씩)
-- `parseSync()`를 통해 AST + comments를 동기적으로 반환
+**oxdoc**은 OXC 파서(Rust NAPI)를 사용하여 구문만 파싱합니다 — 타입 체킹 없이, 네이티브 Rust에서 실행됩니다.
 
-## 확장성
-
-oxdoc의 성능은 파일 수에 따라 선형적으로 확장됩니다:
-
-| 파일 수 | 파싱 시간 | 메모리 |
-|---------|----------|--------|
-| 100 | ~0.02s | ~5MB |
-| 500 | ~0.09s | ~10MB |
-| 1,000 | ~0.18s | ~12MB |
-| 5,000 | ~0.9s | ~22MB |
+| | TypeDoc | oxdoc |
+|---|---|---|
+| 파서 | tsc (JavaScript) | OXC (Rust NAPI) |
+| 타입 해석 | 완전 | 없음 (시그니처 그대로) |
+| 고정 오버헤드 | ~1초 | ~0.05초 |
+| 파일당 비용 | ~2ms | ~0.15ms |
 
 ## 재현 방법
-
-벤치마크를 직접 실행해 보세요:
 
 ```bash
 git clone https://github.com/jiji-hoon96/oxdoc.git
 cd oxdoc
-pnpm install
-pnpm bench
-```
+pnpm install && pnpm build
 
-벤치마크 스위트는 재현 가능한 픽스처를 생성하고 파싱 시간, 커버리지 분석 시간, 총 시간, 메모리 사용량을 여러 스케일에서 측정합니다.
+# 합성 벤치마크
+pnpm bench
+
+# 실제 프로젝트 비교 (TypeDoc 글로벌 설치 필요)
+time node dist/cli/index.js generate --format json --output /tmp/oxdoc-out ./path/to/project/src
+time npx typedoc --json /tmp/typedoc.json --entryPoints ./path/to/project/src/index.ts --skipErrorChecking
+```
