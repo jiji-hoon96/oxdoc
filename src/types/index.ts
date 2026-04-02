@@ -22,10 +22,14 @@ export type SymbolKind =
   | "interface"
   | "type"
   | "enum"
+  | "enum-member"
   | "variable"
   | "method"
   | "property"
-  | "constructor";
+  | "constructor"
+  | "getter"
+  | "setter"
+  | "namespace";
 
 /** 문서화된 심볼 */
 export interface DocumentedSymbol {
@@ -40,6 +44,10 @@ export interface DocumentedSymbol {
     column: number;
   };
   children?: DocumentedSymbol[];
+  isStatic?: boolean;
+  isDefault?: boolean;
+  overloads?: string[];
+  defaultValue?: string;
 }
 
 /** 파일 문서 */

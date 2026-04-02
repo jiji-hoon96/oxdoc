@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Parser: extract enum members as children with `kind: "enum-member"` and `defaultValue`
+- Parser: distinguish getter/setter accessors (`kind: "getter"` / `"setter"`)
+- Parser: detect static class members (`isStatic: true`)
+- Parser: handle default exports (`isDefault: true`)
+- Parser: extract re-exports (`export { X } from`, `export * from`)
+- Parser: merge function overloads into single symbol with `overloads` array
+- Parser: extract namespace/module declarations (`kind: "namespace"`) with children
+- New SymbolKind values: `enum-member`, `getter`, `setter`, `namespace`
+- New DocumentedSymbol fields: `isStatic`, `isDefault`, `overloads`, `defaultValue`
 - Coverage badge generation: `oxdoc coverage --badge coverage.svg` generates SVG badge
 - HTML source links: `repository` config option adds "View Source" links to GitHub in HTML output
 - API change detection: `oxdoc diff <snapshot> [path]` compares API surface against a previous JSON snapshot

@@ -59,6 +59,9 @@ export function parseSource(
     extractSymbols(node, source, filePath, jsdocComments, symbols);
   }
 
+  // 함수 오버로드 병합: 같은 이름의 function 심볼을 하나로 합침
+  mergeOverloads(symbols);
+
   // 파일 레벨 JSDoc: 첫 번째 주석이 첫 번째 선언보다 앞에 있고, 어떤 심볼에도 매칭되지 않은 경우
   let fileDoc: DocComment | null = null;
   if (jsdocComments.length > 0 && body.length > 0) {
@@ -144,14 +147,71 @@ function extractSymbols(
   jsdocComments: OxcComment[],
   symbols: DocumentedSymbol[],
 ): void {
+  // re-export: export { Foo } from './bar' 또는 export * from './bar'
+  if (node.type === "ExportAllDeclaration" && node.source) {
+    const doc = findLeadingJSDoc(node.start, jsdocComments, source);
+    const modulePath = node.source.value ?? node.source.raw;
+    const exportedName = node.exported?.name;
+    symbols.push({
+      name: exportedName ?? "*",
+      kind: "variable",
+      doc,
+      signature: exportedName
+        ? `export * as ${exportedName} from '${modulePath}'`
+        : `export * from '${modulePath}'`,
+      exported: true,
+      location: locationFromOffset(source, node.start, filePath),
+    });
+    return;
+  }
+
+  if (node.type === "ExportNamedDeclaration" && !node.declaration && node.source && node.specifiers?.length > 0) {
+    const modulePath = node.source.value ?? node.source.raw;
+    for (const spec of node.specifiers) {
+      const localName = spec.local?.name ?? "unknown";
+      const exportedName = spec.exported?.name ?? localName;
+      const doc = findLeadingJSDoc(node.start, jsdocComments, source);
+      const alias = localName !== exportedName ? ` as ${exportedName}` : "";
+      symbols.push({
+        name: exportedName,
+        kind: "variable",
+        doc,
+        signature: `export { ${localName}${alias} } from '${modulePath}'`,
+        exported: true,
+        location: locationFromOffset(source, node.start, filePath),
+      });
+    }
+    return;
+  }
+
   if (node.type === "ExportNamedDeclaration" && node.declaration) {
     const decl = node.declaration;
     const doc = findLeadingJSDoc(node.start, jsdocComments, source);
     extractDeclaration(decl, source, filePath, jsdocComments, symbols, true, doc);
-  } else if (node.type === "ExportDefaultDeclaration" && node.declaration) {
+  } else if (node.type === "ExportDefaultDeclaration") {
     const decl = node.declaration;
     const doc = findLeadingJSDoc(node.start, jsdocComments, source);
-    extractDeclaration(decl, source, filePath, jsdocComments, symbols, true, doc);
+    if (decl && (decl.type === "FunctionDeclaration" || decl.type === "ClassDeclaration" ||
+        decl.type === "TSInterfaceDeclaration" || decl.type === "TSEnumDeclaration" ||
+        decl.type === "TSTypeAliasDeclaration" || decl.type === "VariableDeclaration")) {
+      const before = symbols.length;
+      extractDeclaration(decl, source, filePath, jsdocComments, symbols, true, doc);
+      // 추출된 심볼에 isDefault 설정
+      for (let j = before; j < symbols.length; j++) {
+        symbols[j].isDefault = true;
+      }
+    } else if (decl) {
+      // 익명 expression export: export default { ... }, export default expr
+      symbols.push({
+        name: "default",
+        kind: "variable",
+        doc,
+        signature: extractSignature(source, node),
+        exported: true,
+        isDefault: true,
+        location: locationFromOffset(source, node.start, filePath),
+      });
+    }
   } else {
     const doc = findLeadingJSDoc(node.start, jsdocComments, source);
     extractDeclaration(node, source, filePath, jsdocComments, symbols, false, doc);
@@ -171,6 +231,7 @@ function extractDeclaration(
   parentDoc: DocComment | null,
 ): void {
   switch (decl.type) {
+    case "TSDeclareFunction":
     case "FunctionDeclaration": {
       const name = decl.id?.name ?? "default";
       symbols.push({
@@ -195,17 +256,26 @@ function extractDeclaration(
           let kind: SymbolKind = "property";
 
           if (member.type === "MethodDefinition") {
-            kind = member.kind === "constructor" ? "constructor" : "method";
+            switch (member.kind) {
+              case "constructor": kind = "constructor"; break;
+              case "get": kind = "getter"; break;
+              case "set": kind = "setter"; break;
+              default: kind = "method"; break;
+            }
           }
 
-          children.push({
+          const childSym: DocumentedSymbol = {
             name: memberName,
             kind,
             doc: memberDoc,
             signature: extractSignature(source, member),
             exported: false,
             location: locationFromOffset(source, member.start, filePath),
-          });
+          };
+          if (member.static) {
+            childSym.isStatic = true;
+          }
+          children.push(childSym);
         }
       }
 
@@ -268,6 +338,28 @@ function extractDeclaration(
 
     case "TSEnumDeclaration": {
       const name = decl.id?.name ?? "unknown";
+      const enumChildren: DocumentedSymbol[] = [];
+
+      const enumMembers = decl.body?.members ?? decl.members;
+      if (enumMembers) {
+        for (const member of enumMembers) {
+          const memberName = member.id?.name ?? member.id?.value ?? "unknown";
+          const memberDoc = findLeadingJSDoc(member.start, jsdocComments, source);
+          const memberSym: DocumentedSymbol = {
+            name: memberName,
+            kind: "enum-member",
+            doc: memberDoc,
+            signature: extractSignature(source, member),
+            exported: false,
+            location: locationFromOffset(source, member.start, filePath),
+          };
+          if (member.initializer) {
+            memberSym.defaultValue = source.slice(member.initializer.start, member.initializer.end);
+          }
+          enumChildren.push(memberSym);
+        }
+      }
+
       symbols.push({
         name,
         kind: "enum",
@@ -275,6 +367,7 @@ function extractDeclaration(
         signature: extractSignature(source, decl),
         exported,
         location: locationFromOffset(source, decl.start, filePath),
+        children: enumChildren.length > 0 ? enumChildren : undefined,
       });
       break;
     }
@@ -296,6 +389,28 @@ function extractDeclaration(
           location: locationFromOffset(source, declarator.start, filePath),
         });
       }
+      break;
+    }
+
+    case "TSModuleDeclaration": {
+      const name = decl.id?.name ?? decl.id?.value ?? "unknown";
+      const nsChildren: DocumentedSymbol[] = [];
+
+      if (decl.body?.body) {
+        for (const child of decl.body.body) {
+          extractSymbols(child, source, filePath, jsdocComments, nsChildren);
+        }
+      }
+
+      symbols.push({
+        name,
+        kind: "namespace",
+        doc: parentDoc,
+        signature: `namespace ${name}`,
+        exported,
+        location: locationFromOffset(source, decl.start, filePath),
+        children: nsChildren.length > 0 ? nsChildren : undefined,
+      });
       break;
     }
   }
@@ -388,4 +503,47 @@ function locationFromOffset(
   }
 
   return { file: filePath, line, column };
+}
+
+/**
+ * 함수 오버로드를 병합한다.
+ * 같은 이름의 function 심볼이 여러 개 있으면 마지막 것(구현체)에
+ * 이전 시그니처들을 overloads 배열로 합치고 나머지를 제거한다.
+ */
+function mergeOverloads(symbols: DocumentedSymbol[]): void {
+  const funcGroups = new Map<string, number[]>();
+  for (let i = 0; i < symbols.length; i++) {
+    if (symbols[i].kind === "function") {
+      const key = symbols[i].name;
+      const group = funcGroups.get(key);
+      if (group) {
+        group.push(i);
+      } else {
+        funcGroups.set(key, [i]);
+      }
+    }
+  }
+
+  const toRemove = new Set<number>();
+  for (const [, indices] of funcGroups) {
+    if (indices.length <= 1) continue;
+    // 마지막이 구현체, 나머지가 오버로드 시그니처
+    const implIdx = indices[indices.length - 1];
+    const overloadSigs: string[] = [];
+    for (let j = 0; j < indices.length - 1; j++) {
+      overloadSigs.push(symbols[indices[j]].signature);
+      toRemove.add(indices[j]);
+    }
+    symbols[implIdx].overloads = overloadSigs;
+    // 구현체에 JSDoc이 없으면 첫 번째 오버로드의 JSDoc을 사용
+    if (!symbols[implIdx].doc && symbols[indices[0]].doc) {
+      symbols[implIdx].doc = symbols[indices[0]].doc;
+    }
+  }
+
+  // 역순으로 제거 (인덱스 안정성)
+  const removeArr = Array.from(toRemove).sort((a, b) => b - a);
+  for (const idx of removeArr) {
+    symbols.splice(idx, 1);
+  }
 }
