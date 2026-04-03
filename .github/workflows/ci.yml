@@ -29,11 +29,11 @@ jobs:
         run: pnpm typecheck
         continue-on-error: true
 
-      - name: Test
-        run: pnpm test
-
       - name: Build
         run: pnpm build
+
+      - name: Test
+        run: pnpm test
 
   security-audit:
     runs-on: ubuntu-latest
