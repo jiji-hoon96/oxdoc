@@ -56,6 +56,7 @@
   "bugs": {
     "url": "https://github.com/jiji-hoon96/oxdoc/issues"
   },
+  "packageManager": "pnpm@9.15.4",
   "engines": {
     "node": ">=20"
   },
