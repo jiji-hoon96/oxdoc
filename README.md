@@ -53,6 +53,38 @@ npx oxdoc doctest ./src
 npx oxdoc diff ./api-snapshot.json ./src --fail-on-breaking
 ```
 
+## GitHub Action
+
+Add documentation quality checks to any project's CI:
+
+```yaml
+# .github/workflows/docs.yml
+name: Documentation Quality
+on: [push, pull_request]
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jiji-hoon96/oxdoc@main
+        with:
+          source: './src'
+          commands: 'coverage doctest'
+          threshold: 80
+```
+
+Available inputs:
+
+| Input | Description | Default |
+|-------|-------------|---------|
+| `source` | Source directory | `./src` |
+| `commands` | Commands to run (`coverage doctest diff generate`) | `coverage doctest` |
+| `threshold` | Minimum coverage % (0 = no check) | `0` |
+| `format` | Output format for generate | `json` |
+| `diff-snapshot` | Previous JSON snapshot path for diff | - |
+| `fail-on-breaking` | Fail on breaking API changes | `false` |
+
 ## CLI Commands
 
 ### `oxdoc generate`

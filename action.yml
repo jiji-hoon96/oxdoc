@@ -1,0 +1,122 @@
+name: 'oxdoc'
+description: 'Native-speed documentation coverage, doctest, and API diff for TypeScript/JavaScript'
+author: 'jiji-hoon96'
+
+branding:
+  icon: 'book-open'
+  color: 'blue'
+
+inputs:
+  source:
+    description: 'Source directory to analyze'
+    required: false
+    default: './src'
+  commands:
+    description: 'Commands to run (space-separated: coverage doctest diff generate)'
+    required: false
+    default: 'coverage doctest'
+  threshold:
+    description: 'Minimum documentation coverage percentage (0-100)'
+    required: false
+    default: '0'
+  format:
+    description: 'Output format for generate command (json, markdown, html, llms-txt)'
+    required: false
+    default: 'json'
+  output:
+    description: 'Output directory for generate command'
+    required: false
+    default: './docs-output'
+  diff-snapshot:
+    description: 'Path to previous JSON snapshot for diff command'
+    required: false
+    default: ''
+  fail-on-breaking:
+    description: 'Fail if breaking API changes detected (for diff command)'
+    required: false
+    default: 'false'
+  node-version:
+    description: 'Node.js version to use'
+    required: false
+    default: '20'
+
+outputs:
+  coverage:
+    description: 'Documentation coverage percentage'
+    value: ${{ steps.coverage.outputs.percent }}
+  doctest-passed:
+    description: 'Number of doctest assertions passed'
+    value: ${{ steps.doctest.outputs.passed }}
+  doctest-failed:
+    description: 'Number of doctest assertions failed'
+    value: ${{ steps.doctest.outputs.failed }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+
+    - name: Install oxdoc
+      shell: bash
+      run: npm install -g @jiji-hoon96/oxdoc
+
+    - name: Run coverage
+      id: coverage
+      if: contains(inputs.commands, 'coverage')
+      shell: bash
+      run: |
+        echo "::group::oxdoc coverage"
+        RESULT=$(oxdoc coverage ${{ inputs.source }} --threshold ${{ inputs.threshold }} --format json 2>&1) || true
+        echo "$RESULT"
+        PERCENT=$(echo "$RESULT" | python3 -c "import json,sys; d=json.load(sys.stdin); print(f'{d[\"coveragePercent\"]:.1f}')" 2>/dev/null || echo "0")
+        echo "percent=$PERCENT" >> $GITHUB_OUTPUT
+        echo "::endgroup::"
+
+        if [ "${{ inputs.threshold }}" != "0" ]; then
+          oxdoc coverage ${{ inputs.source }} --threshold ${{ inputs.threshold }}
+        fi
+
+    - name: Run doctest
+      id: doctest
+      if: contains(inputs.commands, 'doctest')
+      shell: bash
+      run: |
+        echo "::group::oxdoc doctest"
+        RESULT=$(oxdoc doctest ${{ inputs.source }} --reporter json 2>&1) || true
+        echo "$RESULT" | python3 -c "
+        import json, sys
+        try:
+          d = json.load(sys.stdin)
+          print(f'Passed: {d[\"passed\"]}, Failed: {d[\"failed\"]}, Skipped: {d[\"skipped\"]}, Total: {d[\"total\"]}')
+          with open('$GITHUB_OUTPUT' if '$GITHUB_OUTPUT' else '/dev/null', 'a') as f:
+            f.write(f'passed={d[\"passed\"]}\n')
+            f.write(f'failed={d[\"failed\"]}\n')
+        except:
+          print('Failed to parse doctest output')
+        " 2>/dev/null || true
+        echo "::endgroup::"
+
+        oxdoc doctest ${{ inputs.source }}
+
+    - name: Run generate
+      if: contains(inputs.commands, 'generate')
+      shell: bash
+      run: |
+        echo "::group::oxdoc generate"
+        oxdoc generate ${{ inputs.source }} --format ${{ inputs.format }} --output ${{ inputs.output }}
+        echo "::endgroup::"
+
+    - name: Run diff
+      if: contains(inputs.commands, 'diff') && inputs.diff-snapshot != ''
+      shell: bash
+      run: |
+        echo "::group::oxdoc diff"
+        DIFF_FLAGS=""
+        if [ "${{ inputs.fail-on-breaking }}" = "true" ]; then
+          DIFF_FLAGS="--fail-on-breaking"
+        fi
+        oxdoc diff ${{ inputs.diff-snapshot }} ${{ inputs.source }} $DIFF_FLAGS
+        echo "::endgroup::"
