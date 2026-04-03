@@ -1,6 +1,6 @@
 {
   "name": "@jiji-hoon96/oxdoc",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Native-speed TypeScript/JavaScript API documentation generator powered by OXC",
   "type": "module",
   "bin": {
